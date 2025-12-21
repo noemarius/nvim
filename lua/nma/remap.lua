@@ -82,16 +82,18 @@ vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
 end, { desc = "Source current file" })
 
+-- Wraps opencode-specific mappings so they only run when the plugin is available.
 local function map_opencode(modes, lhs, handler, desc)
-	vim.keymap.set(modes, lhs, function()
-		local ok, opencode = pcall(require, "opencode")
-		if not ok then
-			vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
-			return
-		end
+    vim.keymap.set(modes, lhs, function()
+        local ok, opencode = pcall(require, "opencode")
+        if not ok then
+            -- Surface a gentle warning instead of throwing when the plugin is missing.
+            vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
+            return
+        end
 
-		handler(opencode)
-	end, { desc = desc, silent = true })
+        handler(opencode)
+    end, { desc = desc, silent = true })
 end
 
 map_opencode({ "n", "x" }, "<leader>oa", function(opencode)
