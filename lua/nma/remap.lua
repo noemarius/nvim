@@ -1,19 +1,20 @@
 local M = {}
 
-vim.g.mapleader = " " -- Set leader key to space
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex) -- Open file explorer
-vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>")
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- Move selected line/block down
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv") -- Move selected line/block up
+vim.g.mapleader = " "
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw file explorer" })
+vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
-vim.keymap.set("n", "J", "mzJ`z") -- Join line below to the current line with a space
-vim.keymap.set("n", "<C-d>", "<C-d>zz") -- Scroll down and center cursor
-vim.keymap.set("n", "<C-u>", "<C-u>zz") -- Scroll up and center cursor
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join lines (cursor stays)" })
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down (centered)" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up (centered)" })
 vim.keymap.set(
 	"n",
 	"<leader>ey",
-	'<cmd>lua vim.diagnostic.open_float()<CR><cmd>lua vim.diagnostic.open_float()<CR>ggVG"+Y<CR>'
-) -- Open diagnostics float and copy all text to clipboard
+	'<cmd>lua vim.diagnostic.open_float()<CR><cmd>lua vim.diagnostic.open_float()<CR>ggVG"+Y<CR>',
+	{ desc = "Copy diagnostics to clipboard" }
+)
 
 -- Optional diagnostic navigation helpers
 -- vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
@@ -24,15 +25,13 @@ vim.keymap.set(
 -- vim.keymap.set("n", "n", "nzzzv") -- Center cursor after searching next occurrence
 -- vim.keymap.set("n", "N", "Nzzzv") -- Center cursor after searching previous occurrence
 
-vim.keymap.set("n", "<leader>/", ":nohl<CR>")
--- greatest remap ever
-vim.keymap.set("x", "<leader>p", [['_dP]]) -- Paste without overwriting register
+vim.keymap.set("n", "<leader>/", ":nohl<CR>", { desc = "Clear search highlight" })
+vim.keymap.set("x", "<leader>p", [['_dP]], { desc = "Paste without overwriting register" })
 
--- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- Yank to system clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]]) -- Yank line to system clipboard
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to system clipboard" })
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Yank line to system clipboard" })
 
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]]) -- Delete without overwriting register
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete to black hole register" })
 
 -- Optional buffer management
 -- vim.keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
@@ -47,8 +46,8 @@ vim.keymap.set("n", "<leader>q", "<cmd>qa<CR>", { desc = "Quit Neovim" })
 -- vim.keymap.set("n", "<leader>W", ":wall<CR>", { desc = "Save all" })
 -- vim.keymap.set("n", "<leader><leader>", function() vim.cmd("so") end, { desc = "Source current file" })
 
-vim.keymap.set("n", "Q", "<nop>") -- Disable Ex mode
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format) -- Format code using LSP
+vim.keymap.set("n", "Q", "<nop>", { desc = "Disable Ex mode" })
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format with LSP" })
 
 -- Optional LSP convenience bindings
 -- vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
@@ -57,10 +56,10 @@ vim.keymap.set("n", "<leader>f", vim.lsp.buf.format) -- Format code using LSP
 -- vim.keymap.set("n", "gh", vim.lsp.buf.hover, { desc = "Hover info" })
 -- vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Goto implementation" })
 
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz") -- Go to next item in quickfix list and center cursor
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz") -- Go to previous item in quickfix list and center cursor
-vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz") -- Go to next item in location list and center cursor
-vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz") -- Go to previous item in location list and center cursor
+vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Prev quickfix item" })
+vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Next loclist item" })
+vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Prev loclist item" })
 
 -- Optional window management helpers
 -- vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", { desc = "Vertical split" })
@@ -71,18 +70,17 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz") -- Go to previous item in l
 -- vim.keymap.set("n", "<leader>wk", "<C-w>k", { desc = "Upper window" })
 -- vim.keymap.set("n", "<leader>wl", "<C-w>l", { desc = "Right window" })
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]) -- Replace word under cursor
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true }) -- Make current file executable
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
-vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>") -- Insert Go error handling snippet
+vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>", { desc = "Go error snippet" })
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/nma/packer.lua<CR>") -- Open packer.lua file
-vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>") -- Run CellularAutomaton make_it_rain
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/nma/packer.lua<CR>", { desc = "Edit packer.lua" })
+vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain" })
 
--- Source current file
 vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
-end)
+end, { desc = "Source current file" })
 
 local function map_opencode(modes, lhs, handler, desc)
 	vim.keymap.set(modes, lhs, function()
@@ -113,22 +111,23 @@ end, "Toggle opencode panel")
 function M.apply_lsp_keymaps(opts)
 	opts = opts or {}
 
-	local function map(mode, lhs, rhs)
-		vim.keymap.set(mode, lhs, rhs, opts)
+	local function map(mode, lhs, rhs, desc)
+		local map_opts = vim.tbl_extend("force", opts, { desc = desc })
+		vim.keymap.set(mode, lhs, rhs, map_opts)
 	end
 
-	map("n", "K", vim.lsp.buf.hover)
-	map("n", "gd", vim.lsp.buf.definition)
-	map("n", "gD", vim.lsp.buf.declaration)
-	map("n", "gi", vim.lsp.buf.implementation)
-	map("n", "go", vim.lsp.buf.type_definition)
-	map("n", "gr", vim.lsp.buf.references)
-	map("n", "gs", vim.lsp.buf.signature_help)
-	map("n", "<F2>", vim.lsp.buf.rename)
+	map("n", "K", vim.lsp.buf.hover, "Hover documentation")
+	map("n", "gd", vim.lsp.buf.definition, "Go to definition")
+	map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
+	map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
+	map("n", "go", vim.lsp.buf.type_definition, "Go to type definition")
+	map("n", "gr", vim.lsp.buf.references, "Find references")
+	map("n", "gs", vim.lsp.buf.signature_help, "Signature help")
+	map("n", "<F2>", vim.lsp.buf.rename, "Rename symbol")
 	vim.keymap.set({ "n", "x" }, "<F3>", function()
 		vim.lsp.buf.format({ async = true })
-	end, opts)
-	map("n", "<F4>", vim.lsp.buf.code_action)
+	end, vim.tbl_extend("force", opts, { desc = "Format buffer" }))
+	map("n", "<F4>", vim.lsp.buf.code_action, "Code action")
 end
 
 return M

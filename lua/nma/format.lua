@@ -1,5 +1,3 @@
-local M = {}
-
 local format_group = vim.api.nvim_create_augroup("NmaFormat", {})
 local stylua_missing_warned = false
 
@@ -59,5 +57,3 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = "*.lua",
 	callback = apply_stylua,
 })
-
-return M

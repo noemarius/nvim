@@ -149,8 +149,6 @@ return require("packer").startup(function(use)
 				},
 			}, vim.g.opencode_opts or {})
 
-			vim.o.autoread = true
-
 			if not vim.g.snacks_configured then
 				local ok_snacks, snacks = pcall(require, "snacks")
 				if ok_snacks then

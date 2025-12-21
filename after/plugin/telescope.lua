@@ -1,5 +1,8 @@
-local telescope = require("telescope")
-local builtin = require("telescope.builtin")
+local ok_telescope, telescope = pcall(require, "telescope")
+local ok_builtin, builtin = pcall(require, "telescope.builtin")
+if not (ok_telescope and ok_builtin) then
+    return
+end
 
 telescope.setup({
 	pickers = {
