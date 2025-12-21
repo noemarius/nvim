@@ -1,19 +1,21 @@
-local telescope = require('telescope')
-local builtin = require('telescope.builtin')
+local telescope = require("telescope")
+local builtin = require("telescope.builtin")
 
-telescope.setup {
-    pickers = {
-        find_files = {
-            hidden = true
-        },
-    },
-    defaults = {
-        file_ignore_patterns = {
-            "node_modules", ".git",".keep"
+telescope.setup({
+	pickers = {
+		find_files = {
+			hidden = true,
+		},
+	},
+	defaults = {
+		file_ignore_patterns = {
+			"node_modules",
+			".git",
+			".keep",
+		},
+	},
+})
 
-        },
-    }
-}
 -- telescope.setup {
 --     defaults = {
 --         vimgrep_arguments = {
@@ -28,13 +30,11 @@ telescope.setup {
 --         },
 --     } };
 
-
-vim.keymap.set('n', '<leader>tf', builtin.find_files, { desc = 'Telescope find files' })
-vim.keymap.set('n', '<leader>tg', builtin.git_files, { desc = 'Telescope find git files' })
-vim.keymap.set('n', '<leader>ti', function()
-    builtin.grep_string({ search = vim.fn.input("Grep > ") })
-end
-)
+vim.keymap.set("n", "<leader>tf", builtin.find_files, { desc = "Telescope find files" })
+vim.keymap.set("n", "<leader>tg", builtin.git_files, { desc = "Telescope find git files" })
+vim.keymap.set("n", "<leader>ti", function()
+	builtin.grep_string({ search = vim.fn.input("Grep > ") })
+end)
 
 -- Optional picker bindings for later use
 -- vim.keymap.set('n', '<leader>tl', builtin.live_grep, { desc = 'Telescope live grep' })

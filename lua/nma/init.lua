@@ -1,9 +1,10 @@
 require("nma.options")
 require("nma.remap")
+require("nma.format")
 require("nma.packer")
 require("nma.lsp_zero")
 
-vim.cmd('colorscheme tokyonight')
+vim.cmd("colorscheme tokyonight")
 
 -- local augroup = vim.api.nvim_create_augroup
 -- local nmaGroup = augroup('nma', {})
