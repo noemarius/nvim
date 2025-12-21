@@ -40,54 +40,6 @@ return require("packer").startup(function(use)
 					},
 				},
 			})
-			vim.api.nvim_create_autocmd("BufEnter", {
-				callback = function()
-					pcall(function()
-						require("neo-tree.sources.filesystem").refresh()
-					end)
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("BufWritePost", {
-				callback = function()
-					pcall(function()
-						require("neo-tree.sources.filesystem").refresh()
-					end)
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("TermClose", {
-				pattern = "*git*",
-				callback = function()
-					pcall(function()
-						require("neo-tree.sources.git_status").refresh()
-					end)
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("User", {
-				pattern = "GitCommit",
-				callback = function()
-					pcall(function()
-						require("neo-tree.sources.filesystem").refresh()
-					end)
-					pcall(function()
-						require("neo-tree.sources.git_status").refresh()
-					end)
-				end,
-			})
-
-			-- Auto close Neo-tree when opening a file
-			vim.api.nvim_create_autocmd("BufEnter", {
-				callback = function()
-					local buf = vim.api.nvim_get_current_buf()
-					local ft = vim.api.nvim_buf_get_option(buf, "filetype")
-					if ft ~= "neo-tree" then
-						pcall(vim.cmd, "Neotree close")
-					end
-				end,
-			})
-			-- vim.keymap.set("n", "<C-n>", ":Neotree filesystem reveal left<CR>", {})
 		end,
 	})
 	use("wbthomason/packer.nvim")
@@ -102,7 +54,7 @@ return require("packer").startup(function(use)
 	-- use('Mofiqul/vscode.nvim') -- theme
 
 	use("folke/tokyonight.nvim")
-	--
+
 	-- use({
 	--     "rose-pine/neovim",
 	--     as = "rose-pine",
@@ -110,7 +62,7 @@ return require("packer").startup(function(use)
 	--         vim.cmd("colorscheme rose-pine")
 	--     end
 	-- })
-	--
+
 	use("folke/trouble.nvim")
 
 	use({
@@ -120,6 +72,7 @@ return require("packer").startup(function(use)
 			ts_update()
 		end,
 	})
+
 	use("nvim-treesitter/playground")
 
 	use("theprimeagen/harpoon")
@@ -139,12 +92,12 @@ return require("packer").startup(function(use)
 
 	use({ "hrsh7th/cmp-nvim-lsp" })
 
-	use({ "VonHeikemen/lsp-zero.nvim", branch = "v4.x" })
 	use({
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 		"neovim/nvim-lspconfig",
 	})
+
 	--use("nvim-treesitter/nvim-treesitter-context");
 
 	use("nvzone/volt")
@@ -158,6 +111,7 @@ return require("packer").startup(function(use)
 	use("folke/zen-mode.nvim")
 
 	use("eandrju/cellular-automaton.nvim")
+
 	use("laytan/cloak.nvim")
 
 	use({
@@ -174,36 +128,6 @@ return require("packer").startup(function(use)
 		config = function()
 			require("nvim-autopairs").setup({})
 		end,
-	})
-
-	use({
-		"greggh/claude-code.nvim",
-		requires = {
-			"nvim-lua/plenary.nvim", -- required for git operations
-		},
-		config = function()
-			local ok, claude = pcall(require, "claude-code")
-			if ok then
-				claude.setup()
-			end
-		end,
-	})
-
-	use("github/copilot.vim")
-	use({
-		"jackmort/chatgpt.nvim",
-		config = function()
-			local ok, chatgpt = pcall(require, "chatgpt")
-			if ok then
-				chatgpt.setup()
-			end
-		end,
-		requires = {
-			"muniftanjim/nui.nvim",
-			"nvim-lua/plenary.nvim",
-			"folke/trouble.nvim",
-			"nvim-telescope/telescope.nvim",
-		},
 	})
 
 	use({

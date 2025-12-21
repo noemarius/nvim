@@ -79,9 +79,10 @@ vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>Oreturn nil, err<Es
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/nma/packer.lua<CR>") -- Open packer.lua file
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>") -- Run CellularAutomaton make_it_rain
 
--- vim.keymap.set("n", "<leader><leader>", function()
---     vim.cmd("so")
--- end) -- Source current file
+-- Source current file
+vim.keymap.set("n", "<leader><leader>", function()
+	vim.cmd("so")
+end)
 
 local function map_opencode(modes, lhs, handler, desc)
 	vim.keymap.set(modes, lhs, function()
@@ -107,7 +108,7 @@ map_opencode("n", "<leader>ot", function(opencode)
 	opencode.toggle()
 end, "Toggle opencode panel")
 
-vim.keymap.set("n", "<leader>cc", "<cmd>ClaudeCode<CR>", { desc = "Toggle Claude Code" })
+-- vim.keymap.set("n", "<leader>cc", "<cmd>ClaudeCode<CR>", { desc = "Toggle Claude Code" })
 
 function M.apply_lsp_keymaps(opts)
 	opts = opts or {}

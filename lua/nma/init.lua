@@ -2,7 +2,7 @@ require("nma.options")
 require("nma.remap")
 require("nma.format")
 require("nma.packer")
-require("nma.lsp_zero")
+require("nma.lsp")
 
 vim.cmd("colorscheme tokyonight")
 
