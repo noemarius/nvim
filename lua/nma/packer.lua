@@ -17,17 +17,20 @@ return require("packer").startup(function(use)
 		config = function()
 			require("neo-tree").setup({
 				git_status = {
-					enabled = true,
-					refresh_interval = 1000,
+					enabled = false,
+					refresh_interval = 5000,
 				},
 				filesystem = {
-					use_libuv_file_watcher = true,
+					bind_to_cwd = true,
+					hijack_netrw_behavior = "disabled",
+					use_libuv_file_watcher = false,
 					follow_current_file = {
 						enabled = false,
 					},
 					filtered_items = {
 						visible = true,
 						show_hidden_count = true,
+						hide_ignored = true,
 						hide_dotfiles = false,
 						hide_gitignored = true,
 						hide_by_name = {

@@ -11,7 +11,7 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down (centered)" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up (centered)" })
 vim.keymap.set(
 	"n",
-	"<leader>ey",
+	"<leader>cd",
 	'<cmd>lua vim.diagnostic.open_float()<CR><cmd>lua vim.diagnostic.open_float()<CR>ggVG"+Y<CR>',
 	{ desc = "Copy diagnostics to clipboard" }
 )
@@ -70,30 +70,36 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Prev loclist item
 -- vim.keymap.set("n", "<leader>wk", "<C-w>k", { desc = "Upper window" })
 -- vim.keymap.set("n", "<leader>wl", "<C-w>l", { desc = "Right window" })
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
+vim.keymap.set(
+	"n",
+	"<leader>s",
+	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+	{ desc = "Replace word under cursor" }
+)
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
-vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>", { desc = "Go error snippet" })
+vim.keymap.set("n", "<leader>ge", "oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>", { desc = "Go error snippet" })
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/nma/packer.lua<CR>", { desc = "Edit packer.lua" })
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>", { desc = "Make it rain" })
 
 vim.keymap.set("n", "<leader><leader>", function()
 	vim.cmd("so")
+	vim.notify("Sourced current file")
 end, { desc = "Source current file" })
 
 -- Wraps opencode-specific mappings so they only run when the plugin is available.
 local function map_opencode(modes, lhs, handler, desc)
-    vim.keymap.set(modes, lhs, function()
-        local ok, opencode = pcall(require, "opencode")
-        if not ok then
-            -- Surface a gentle warning instead of throwing when the plugin is missing.
-            vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
-            return
-        end
+	vim.keymap.set(modes, lhs, function()
+		local ok, opencode = pcall(require, "opencode")
+		if not ok then
+			-- Surface a gentle warning instead of throwing when the plugin is missing.
+			vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
+			return
+		end
 
-        handler(opencode)
-    end, { desc = desc, silent = true })
+		handler(opencode)
+	end, { desc = desc, silent = true })
 end
 
 map_opencode({ "n", "x" }, "<leader>oa", function(opencode)

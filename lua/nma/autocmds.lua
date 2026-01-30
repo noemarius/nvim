@@ -44,3 +44,11 @@ api.nvim_create_autocmd("FileType", {
 		set_indent(args.buf, 4)
 	end,
 })
+
+-- api.nvim_create_autocmd("VimEnter", {
+-- 	callback = function()
+-- 		if vim.fn.argc() == 1 and vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
+-- 			pcall(vim.cmd, "Neotree close")
+-- 		end
+-- 	end,
+-- })
