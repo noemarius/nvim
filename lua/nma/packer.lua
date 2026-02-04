@@ -54,6 +54,11 @@ return require("packer").startup(function(use)
 		requires = { { "nvim-lua/plenary.nvim" } },
 	})
 
+	use({
+		"nvim-telescope/telescope-fzf-native.nvim",
+		run = "make",
+	})
+
 	-- use('Mofiqul/vscode.nvim') -- theme
 
 	use("folke/tokyonight.nvim")
@@ -121,6 +126,10 @@ return require("packer").startup(function(use)
 				linehl = true,
 				numhl = true,
 			})
+			-- Subtle line highlights (lower opacity effect via darker bg colors)
+			vim.api.nvim_set_hl(0, "GitSignsAddLn", { bg = "#1a2a1a" })
+			vim.api.nvim_set_hl(0, "GitSignsChangeLn", { bg = "#1a1a2a" })
+			vim.api.nvim_set_hl(0, "GitSignsDeleteLn", { bg = "#2a1a1a" })
 		end,
 	})
 
@@ -131,8 +140,10 @@ return require("packer").startup(function(use)
 	})
 
 	use({ "hrsh7th/nvim-cmp" })
-
 	use({ "hrsh7th/cmp-nvim-lsp" })
+	use({ "hrsh7th/cmp-buffer" })
+	use({ "hrsh7th/cmp-path" })
+	use({ "hrsh7th/cmp-cmdline" })
 
 	use({
 		"williamboman/mason.nvim",
@@ -145,7 +156,15 @@ return require("packer").startup(function(use)
 		requires = { "williamboman/mason.nvim" },
 	})
 
-	--use("nvim-treesitter/nvim-treesitter-context");
+	use({
+		"nvim-treesitter/nvim-treesitter-context",
+		config = function()
+			require("treesitter-context").setup({
+				max_lines = 3,
+				trim_scope = "outer",
+			})
+		end,
+	})
 
 	use("nvzone/volt")
 	use({
@@ -183,6 +202,93 @@ return require("packer").startup(function(use)
 		tag = "*",
 		config = function()
 			require("nvim-surround").setup()
+		end,
+	})
+
+	-- Keymap discovery popup
+	use({
+		"folke/which-key.nvim",
+		config = function()
+			vim.o.timeout = true
+			vim.o.timeoutlen = 300
+			require("which-key").setup({
+				delay = 300,
+				icons = {
+					breadcrumb = ">>",
+					separator = "->",
+					group = "+",
+				},
+			})
+		end,
+	})
+
+	-- Indent guides
+	use({
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			require("ibl").setup({
+				indent = {
+					char = "│",
+				},
+				scope = {
+					enabled = true,
+					show_start = false,
+					show_end = false,
+					char = "▎",
+				},
+			})
+		end,
+	})
+
+	-- Smart commenting
+	use({
+		"numToStr/Comment.nvim",
+		config = function()
+			require("Comment").setup()
+		end,
+	})
+
+	-- LSP progress indicator
+	use({
+		"j-hui/fidget.nvim",
+		config = function()
+			require("fidget").setup({
+				notification = {
+					window = {
+						winblend = 0,
+					},
+				},
+			})
+		end,
+	})
+
+	-- Highlight TODO/FIXME/HACK comments
+	use({
+		"folke/todo-comments.nvim",
+		requires = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("todo-comments").setup({})
+			vim.keymap.set("n", "<leader>tt", "<cmd>TodoTelescope<CR>", { desc = "[Todo] Search TODOs" })
+			vim.keymap.set("n", "]t", function()
+				require("todo-comments").jump_next()
+			end, { desc = "[Todo] Next todo" })
+			vim.keymap.set("n", "[t", function()
+				require("todo-comments").jump_prev()
+			end, { desc = "[Todo] Previous todo" })
+		end,
+	})
+
+	-- Auto-close HTML/JSX tags
+	use({
+		"windwp/nvim-ts-autotag",
+		config = function()
+			require("nvim-ts-autotag").setup({
+				opts = {
+					enable_close = true,
+					enable_rename = true,
+					enable_close_on_slash = false,
+				},
+			})
 		end,
 	})
 

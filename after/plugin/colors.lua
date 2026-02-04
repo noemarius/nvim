@@ -1,6 +1,6 @@
 local function apply_colorscheme(color)
-	color = color or "retrobox"
-	-- color = color or "tokyonight"
+	-- color = color or "retrobox"
+	color = color or "tokyonight"
 	local ok, err = pcall(vim.cmd.colorscheme, color)
 	if not ok then
 		vim.notify("Colorscheme '" .. color .. "' not found: " .. err, vim.log.levels.WARN)

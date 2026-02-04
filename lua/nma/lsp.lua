@@ -147,6 +147,8 @@ end
 cmp.setup({
 	sources = {
 		{ name = "nvim_lsp" },
+		{ name = "buffer", keyword_length = 3 },
+		{ name = "path" },
 	},
 	snippet = {
 		expand = function(args)
@@ -178,5 +180,36 @@ cmp.setup({
 				fallback()
 			end
 		end, { "i", "s" }),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<C-e>"] = cmp.mapping.abort(),
+		["<CR>"] = cmp.mapping.confirm({ select = false }),
+	}),
+	formatting = {
+		format = function(entry, vim_item)
+			vim_item.menu = ({
+				nvim_lsp = "[LSP]",
+				buffer = "[Buf]",
+				path = "[Path]",
+			})[entry.source.name]
+			return vim_item
+		end,
+	},
+})
+
+-- Command line completion for search (/)
+cmp.setup.cmdline("/", {
+	mapping = cmp.mapping.preset.cmdline(),
+	sources = {
+		{ name = "buffer" },
+	},
+})
+
+-- Command line completion for commands (:)
+cmp.setup.cmdline(":", {
+	mapping = cmp.mapping.preset.cmdline(),
+	sources = cmp.config.sources({
+		{ name = "path" },
+	}, {
+		{ name = "cmdline" },
 	}),
 })
