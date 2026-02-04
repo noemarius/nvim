@@ -58,6 +58,28 @@ return require("packer").startup(function(use)
 
 	use("folke/tokyonight.nvim")
 
+	use({
+		"nvim-lualine/lualine.nvim",
+		requires = { "nvim-tree/nvim-web-devicons", opt = true },
+		config = function()
+			require("lualine").setup({
+				options = {
+					theme = "tokyonight",
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
+				},
+				sections = {
+					lualine_a = { "mode" },
+					lualine_b = { "branch", "diff", "diagnostics" },
+					lualine_c = { { "filename", path = 1 } },
+					lualine_x = { "encoding", "fileformat", "filetype" },
+					lualine_y = { "progress" },
+					lualine_z = { "location" },
+				},
+			})
+		end,
+	})
+
 	-- use({
 	--     "rose-pine/neovim",
 	--     as = "rose-pine",
@@ -86,6 +108,23 @@ return require("packer").startup(function(use)
 	use("tpope/vim-fugitive")
 
 	use({
+		"lewis6991/gitsigns.nvim",
+		config = function()
+			require("gitsigns").setup({
+				signs = {
+					add          = { text = "│" },
+					change       = { text = "│" },
+					delete       = { text = "_" },
+					topdelete    = { text = "‾" },
+					changedelete = { text = "~" },
+				},
+				linehl = true,
+				numhl = true,
+			})
+		end,
+	})
+
+	use({
 		"chentoast/marks.nvim",
 		-- event = "VeryLazy",
 		-- opts = {},
@@ -99,6 +138,11 @@ return require("packer").startup(function(use)
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 		"neovim/nvim-lspconfig",
+	})
+
+	use({
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		requires = { "williamboman/mason.nvim" },
 	})
 
 	--use("nvim-treesitter/nvim-treesitter-context");
@@ -133,8 +177,17 @@ return require("packer").startup(function(use)
 		end,
 	})
 
+	-- Surround selections with quotes, brackets, etc.
 	use({
-		"NickvanDyke/opencode.nvim",
+		"kylechui/nvim-surround",
+		tag = "*",
+		config = function()
+			require("nvim-surround").setup()
+		end,
+	})
+
+	use({
+		"nickjvandyke/opencode.nvim",
 		requires = {
 			{
 				"folke/snacks.nvim",

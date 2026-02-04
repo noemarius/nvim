@@ -45,10 +45,23 @@ api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- api.nvim_create_autocmd("VimEnter", {
--- 	callback = function()
--- 		if vim.fn.argc() == 1 and vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
--- 			pcall(vim.cmd, "Neotree close")
--- 		end
--- 	end,
--- })
+-- Open opencode panel on startup if .opencode config exists in cwd
+local opencode_group = api.nvim_create_augroup("nma_opencode", { clear = true })
+
+api.nvim_create_autocmd("VimEnter", {
+	group = opencode_group,
+	desc = "Open opencode panel on startup if project has .opencode config",
+	callback = function()
+		-- Check if .opencode directory or file exists in cwd
+		local opencode_config = vim.fn.getcwd() .. "/.opencode"
+		if vim.fn.isdirectory(opencode_config) == 1 or vim.fn.filereadable(opencode_config) == 1 then
+			-- Defer to ensure all plugins are loaded
+			vim.defer_fn(function()
+				local ok, opencode = pcall(require, "opencode")
+				if ok then
+					opencode.toggle()
+				end
+			end, 100)
+		end
+	end,
+})

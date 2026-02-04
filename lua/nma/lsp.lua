@@ -7,7 +7,29 @@ if not (vim.lsp and vim.lsp.config and vim.lsp.enable) then
 	return
 end
 
-local servers = { "lua_ls", "gopls", "eslint", "tailwindcss", "rust_analyzer" }
+-- LSP servers to ensure installed via mason-lspconfig
+local servers = {
+    "lua_ls",
+    "gopls",
+    "eslint",
+    "tailwindcss",
+    "rust_analyzer",
+    "csharp_ls",
+    "dockerls",
+    "bashls",
+    "ts_ls",
+    "pyright",
+    "jsonls",
+    "bicep",
+}
+
+-- Non-LSP tools (formatters, linters) to ensure installed via mason-tool-installer
+local tools = {
+    "prettier",
+    "black",
+    "ruff",
+    "csharpier",
+}
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 local ok_cmp_caps, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
@@ -30,6 +52,7 @@ local function setup_mason()
 		mason.setup({})
 	else
 		vim.notify("mason.nvim is not available", vim.log.levels.WARN)
+		return
 	end
 
 	local ok_mason_lsp, mason_lspconfig = pcall(require, "mason-lspconfig")
@@ -39,6 +62,17 @@ local function setup_mason()
 		})
 	else
 		vim.notify("mason-lspconfig.nvim is not available", vim.log.levels.WARN)
+	end
+
+	local ok_tool_installer, mason_tool_installer = pcall(require, "mason-tool-installer")
+	if ok_tool_installer then
+		mason_tool_installer.setup({
+			ensure_installed = tools,
+			auto_update = false,
+			run_on_start = true,
+		})
+	else
+		vim.notify("mason-tool-installer.nvim is not available", vim.log.levels.WARN)
 	end
 end
 
