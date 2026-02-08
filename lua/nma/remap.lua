@@ -1,5 +1,7 @@
 local M = {}
 
+local ok_tmux, tmux = pcall(require, "tmux")
+
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "[Netrw] Open file explorer" })
 vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>", { desc = "[Neo-tree] Toggle file explorer" })
@@ -9,6 +11,14 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "[Edit] Move selection up"
 vim.keymap.set("n", "J", "mzJ`z", { desc = "[Edit] Join lines (cursor stays)" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "[Navigation] Scroll down (centered)" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "[Navigation] Scroll up (centered)" })
+
+if ok_tmux then
+	vim.keymap.set({ "n", "t" }, "<C-h>", tmux.move_left, { desc = "[Navigation] Move to left pane" })
+	vim.keymap.set({ "n", "t" }, "<C-j>", tmux.move_bottom, { desc = "[Navigation] Move to lower pane" })
+	vim.keymap.set({ "n", "t" }, "<C-k>", tmux.move_top, { desc = "[Navigation] Move to upper pane" })
+	vim.keymap.set({ "n", "t" }, "<C-l>", tmux.move_right, { desc = "[Navigation] Move to right pane" })
+end
+
 vim.keymap.set(
 	"n",
 	"<leader>cd",
@@ -56,10 +66,10 @@ vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "[LSP] Format buff
 -- vim.keymap.set("n", "gh", vim.lsp.buf.hover, { desc = "[LSP] Hover info" })
 -- vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "[LSP] Go to implementation" })
 
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "[Quickfix] Go to next" })
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "[Quickfix] Go to previous" })
-vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "[Loclist] Go to next" })
-vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "[Loclist] Go to previous" })
+vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "[Quickfix] Go to next" })
+vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "[Quickfix] Go to previous" })
+vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "[Loclist] Go to next" })
+vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "[Loclist] Go to previous" })
 
 -- Optional window management helpers
 vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", { desc = "[Window] Vertical split" })
