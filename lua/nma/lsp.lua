@@ -10,11 +10,8 @@ end
 -- LSP servers to ensure installed via mason-lspconfig
 local servers = {
     "lua_ls",
-    "gopls",
     "eslint",
     "tailwindcss",
-    "rust_analyzer",
-    "csharp_ls",
     "dockerls",
     "bashls",
     "ts_ls",
@@ -23,13 +20,19 @@ local servers = {
     "bicep",
 }
 
+-- Optional: only install if runtime is available
+if vim.fn.executable("go") == 1 then table.insert(servers, "gopls") end
+if vim.fn.executable("dotnet") == 1 then table.insert(servers, "csharp_ls") end
+if vim.fn.executable("cargo") == 1 then table.insert(servers, "rust_analyzer") end
+
 -- Non-LSP tools (formatters, linters) to ensure installed via mason-tool-installer
 local tools = {
     "prettier",
     "black",
     "ruff",
-    "csharpier",
 }
+
+if vim.fn.executable("dotnet") == 1 then table.insert(tools, "csharpier") end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 local ok_cmp_caps, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
