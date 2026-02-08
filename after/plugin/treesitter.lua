@@ -1,12 +1,23 @@
-local ok, ts = pcall(require, "nvim-treesitter")
-if not ok then
+local ok_configs, ts_configs = pcall(require, "nvim-treesitter.configs")
+if not ok_configs then
     return
 end
 
--- Install desired parsers (async, no-op if already present)
-ts.install({
-    "javascript", "python", "typescript", "go", "lua",
-    "vim", "vimdoc", "query", "markdown", "markdown_inline",
+ts_configs.setup({
+    ensure_installed = {
+        "javascript",
+        "python",
+        "typescript",
+        "go",
+        "lua",
+        "vim",
+        "vimdoc",
+        "query",
+        "markdown",
+        "markdown_inline",
+    },
+    auto_install = true,
+    sync_install = false,
 })
 
 -- Enable treesitter highlighting for all filetypes that have a parser
