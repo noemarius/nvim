@@ -1,5 +1,7 @@
 # Neovim config
 
+hi
+
 Minimal Neovim configuration rooted at `init.lua`, organized under `lua/nma`.
 
 ## Structure
