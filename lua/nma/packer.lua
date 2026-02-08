@@ -49,8 +49,7 @@ return require("packer").startup(function(use)
 
 	use({
 		"nvim-telescope/telescope.nvim",
-		tag = "0.1.8",
-		-- or                            , branch = "0.1.x",
+		tag = "v0.2.1",
 		requires = { { "nvim-lua/plenary.nvim" } },
 	})
 
@@ -97,10 +96,7 @@ return require("packer").startup(function(use)
 
 	use({
 		"nvim-treesitter/nvim-treesitter",
-		run = function()
-			local ts_update = require("nvim-treesitter.install").update({ with_sync = true })
-			ts_update()
-		end,
+		run = ":TSUpdate",
 	})
 
 	use("theprimeagen/harpoon")
