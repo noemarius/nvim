@@ -154,8 +154,12 @@ local function map_gitsigns()
 	end
 
 	-- Actions
-	map("n", "<leader>hn", gs.nav_hunk("next"), { desc = "[Gitsigns] Next hunk" })
-	map("n", "<leader>hp", gs.nav_hunk("prev"), { desc = "[Gitsigns] Previous hunk" })
+	map("n", "<leader>hn", function()
+		gs.nav_hunk("next")
+	end, { desc = "[Gitsigns] Next hunk" })
+	map("n", "<leader>hp", function()
+		gs.nav_hunk("prev")
+	end, { desc = "[Gitsigns] Previous hunk" })
 	map("n", "<leader>hs", gs.stage_hunk, { desc = "[Gitsigns] Stage hunk" })
 	map("n", "<leader>hr", gs.reset_hunk, { desc = "[Gitsigns] Reset hunk" })
 	map("n", "<leader>hv", gs.preview_hunk, { desc = "[Gitsigns] Preview hunk" })
