@@ -115,10 +115,10 @@ return require("packer").startup(function(use)
 		config = function()
 			require("gitsigns").setup({
 				signs = {
-					add          = { text = "│" },
-					change       = { text = "│" },
-					delete       = { text = "_" },
-					topdelete    = { text = "‾" },
+					add = { text = "│" },
+					change = { text = "│" },
+					delete = { text = "_" },
+					topdelete = { text = "‾" },
 					changedelete = { text = "~" },
 				},
 				linehl = true,
@@ -183,6 +183,13 @@ return require("packer").startup(function(use)
 		tag = "v2.*",
 		config = function()
 			require("window-picker").setup()
+		end,
+	})
+
+	use({
+		"aserowy/tmux.nvim",
+		config = function()
+			return require("tmux").setup()
 		end,
 	})
 
@@ -290,38 +297,38 @@ return require("packer").startup(function(use)
 		end,
 	})
 
-    use({
-        "nickjvandyke/opencode.nvim",
-        requires = {
-            {
-                "folke/snacks.nvim",
-            },
-        },
-        config = function()
-            vim.g.opencode_opts = vim.tbl_deep_extend("force", {
-                provider = {
-                    enabled = "snacks",
-                    snacks = {
-                        input = {},
-                        picker = {},
-                        terminal = {},
-                    },
-                },
-            }, vim.g.opencode_opts or {})
+	use({
+		"nickjvandyke/opencode.nvim",
+		requires = {
+			{
+				"folke/snacks.nvim",
+			},
+		},
+		config = function()
+			vim.g.opencode_opts = vim.tbl_deep_extend("force", {
+				provider = {
+					enabled = "snacks",
+					snacks = {
+						input = {},
+						picker = {},
+						terminal = {},
+					},
+				},
+			}, vim.g.opencode_opts or {})
 
-            if not vim.g.snacks_configured then
-                local ok_snacks, snacks = pcall(require, "snacks")
-                if ok_snacks then
-                    snacks.setup({
-                        input = {},
-                        picker = {},
-                        terminal = {},
-                    })
-                    vim.g.snacks_configured = true
-                else
-                    vim.notify("snacks.nvim not available for opencode", vim.log.levels.WARN)
-                end
-            end
-        end,
-    })
+			if not vim.g.snacks_configured then
+				local ok_snacks, snacks = pcall(require, "snacks")
+				if ok_snacks then
+					snacks.setup({
+						input = {},
+						picker = {},
+						terminal = {},
+					})
+					vim.g.snacks_configured = true
+				else
+					vim.notify("snacks.nvim not available for opencode", vim.log.levels.WARN)
+				end
+			end
+		end,
+	})
 end)
