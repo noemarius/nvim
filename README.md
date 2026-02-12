@@ -1,45 +1,75 @@
 # Neovim config
 
-hi
-
-Minimal Neovim configuration rooted at `init.lua`, organized under `lua/nma`.
+Minimal Neovim configuration rooted at `init.lua`, organized under `lua/custom`.
 
 ## Structure
 
-- `init.lua` loads `lua/nma/init.lua`.
-- `lua/nma/*.lua` contains options, keymaps, autocmds, LSP, and plugin setup.
-- Plugins are managed with packer (see `lua/nma/packer.lua`).
+```
+init.lua                    # Entry point, loads lua/custom/init.lua
+lua/custom/
+├── init.lua                # Main loader
+├── options.lua             # Vim options (exrc enabled)
+├── lazy.lua                # lazy.nvim bootstrap
+├── remap.lua               # Core keymaps
+├── autocmds.lua            # Autocommands
+├── format.lua              # Format-on-save
+├── lsp.lua                 # Native LSP config (0.11+)
+├── health.lua              # Health check (:checkhealth custom)
+└── plugins/                # Plugin specs (lazy.nvim)
+    ├── init.lua            # Plugin loader
+    ├── editor.lua          # Editing: surround, autopairs, comment
+    ├── ui.lua              # UI: tokyonight, neo-tree, lualine, which-key, zen-mode
+    ├── git.lua             # Git: fugitive, gitsigns
+    ├── lsp.lua             # LSP: mason, blink.cmp
+    ├── telescope.lua       # Fuzzy finder
+    ├── treesitter.lua      # Syntax highlighting
+    └── tools.lua           # Tools: harpoon2, trouble, undotree, tmux
+```
 
 ## Validation
 
-- Full plugin sync: `nvim --headless "+PackerSync" "+qall"`
-- Smoke-test a module: `nvim --headless "+luafile lua/nma/<file>.lua" "+qall"`
+```bash
+# Sync plugins
+nvim --headless "+Lazy sync" "+qa"
 
-## Important notes
+# Health check
+nvim -c "checkhealth custom"
 
-- Neovim 0.11+ is required for the built-in LSP workflow (`lua/nma/lsp.lua`).
-- Format-on-save uses CLI formatters with LSP fallback; see `lua/nma/format.lua`.
-- Mason auto-installs LSP servers and tools at startup; see `lua/nma/lsp.lua`.
-- Keymaps live in `lua/nma/remap.lua`; plugins live in `lua/nma/packer.lua`.
-- Opencode automation and cleanup live in `lua/nma/autocmds.lua`.
+# Smoke-test a module
+nvim --headless "+luafile lua/custom/<file>.lua" "+qa"
 
-## Opencode workflow
+# Check startup time
+nvim --startuptime /tmp/startup.log +qa && tail -1 /tmp/startup.log
+```
 
-This config uses `opencode.nvim` with the `snacks` provider. Opencode is launched from
-inside Neovim and can be auto-opened per project when a `.opencode` file or directory
-exists in the project root.
+## Key features
 
-Important behavior and cleanup:
+- **Neovim 0.11+** required for native LSP workflow (`vim.lsp.config`/`vim.lsp.enable`)
+- **lazy.nvim** for plugin management with lazy-loading
+- **blink.cmp** for completions (Rust-based, replaces nvim-cmp)
+- **Harpoon 2** for quick file navigation
+- **exrc** enabled for project-local config (`.nvim.lua`, `.nvimrc`)
+- Format-on-save with CLI formatters and LSP fallback (`:FormatToggle` to disable)
+- Mason auto-installs LSP servers and tools
 
-- Do not pin a single `opencode` port. Each Neovim session can run its own server.
-- On exit, Neovim stops the configured opencode provider (`VimLeavePre`).
-- If a crash leaves stale servers, run `:OpencodeCleanupCwd` to kill only the
-  `opencode --port` processes whose CWD matches the current project.
+## Keymaps
 
-If opencode prompts for servers, it is usually because multiple servers exist in
-the same CWD. Use the cleanup command to remove the stale ones.
+| Key           | Action                     |
+| ------------- | -------------------------- |
+| `<leader>pv`  | Open netrw file explorer   |
+| `<leader>e`   | Toggle neo-tree            |
+| `<leader>a`   | Add file to Harpoon        |
+| `<leader>h`   | Toggle Harpoon menu        |
+| `<C-h/j/k/l>` | Navigate Harpoon marks 1-4 |
+| `<leader>ff`  | Find files (Telescope)     |
+| `<leader>fg`  | Live grep (Telescope)      |
+| `<leader>fb`  | Browse buffers (Telescope) |
+| `<leader>gs`  | Git status (Fugitive)      |
+| `<leader>u`   | Toggle undotree            |
+| `<leader>z`   | Toggle zen mode            |
 
 ## References
 
-- Agent conventions and formatting rules live in `AGENTS.md`.
-- Opencode-related autocmds and the cleanup command live in `lua/nma/autocmds.lua`.
+- Agent conventions: `AGENTS.md`
+- Claude-specific notes: `CLAUDE.md`
+- Migration history: `ROADMAP.md`
