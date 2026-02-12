@@ -12,7 +12,7 @@ set.expandtab = true
 set.smartindent = true
 
 -- Display
-set.wrap = false
+set.wrap = true
 set.termguicolors = true
 set.scrolloff = 8
 set.signcolumn = "yes"
@@ -30,6 +30,7 @@ set.backup = false
 set.writebackup = false
 set.undodir = os.getenv("HOME") .. "/.vim/undodir"
 set.undofile = true
+set.undolevels = 10000
 set.autoread = true
 set.confirm = true
 
@@ -47,14 +48,24 @@ set.splitright = true
 
 -- Performance & responsiveness
 set.updatetime = 50
-set.timeoutlen = 500
-set.lazyredraw = true
+set.timeoutlen = 300
 
 -- UX
 set.mouse = "a"
 set.clipboard = "unnamedplus"
 set.isfname:append("@-@")
+set.shortmess:append("sI")
+
+-- Better diff
+set.diffopt:append({ "algorithm:histogram", "linematch:60" })
+
+-- Session options
+set.sessionoptions = { "buffers", "curdir", "tabpages", "winsize" }
 
 -- Window title
 set.title = true
 set.titlestring = "../%{fnamemodify(getcwd(), ':t')} nv"
+
+-- Project-local config
+set.exrc = true
+set.secure = true

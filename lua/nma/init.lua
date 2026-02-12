@@ -1,6 +1,0 @@
-require("nma.options")
-require("nma.autocmds")
-require("nma.remap")
-require("nma.format")
-require("nma.packer")
-require("nma.lsp")
