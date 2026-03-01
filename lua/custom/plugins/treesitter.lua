@@ -1,50 +1,50 @@
 -- Treesitter syntax highlighting and parsing
 return {
-    {
-        "nvim-treesitter/nvim-treesitter",
-        build = ":TSUpdate",
-        event = { "BufReadPost", "BufNewFile" },
-        config = function()
-            -- Parsers to ensure are installed
-            local ensure_installed = {
-                "javascript",
-                "python",
-                "typescript",
-                "go",
-                "lua",
-                "vim",
-                "vimdoc",
-                "query",
-                "markdown",
-                "markdown_inline",
-                "html",
-                "css",
-                "json",
-                "yaml",
-                "bash",
-                "c",
-                "rust",
-            }
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		lazy = false,
+		config = function()
+			-- Parsers to ensure are installed
+			local ensure_installed = {
+				"javascript",
+				"python",
+				"typescript",
+				"go",
+				"lua",
+				"vim",
+				"vimdoc",
+				"query",
+				"markdown",
+				"markdown_inline",
+				"html",
+				"css",
+				"json",
+				"yaml",
+				"bash",
+				"typst",
+				"c",
+				"rust",
+			}
 
-            -- Schedule parser installation for missing languages
-            vim.schedule(function()
-                for _, lang in ipairs(ensure_installed) do
-                    local ok = pcall(vim.treesitter.language.inspect, lang)
-                    if not ok then
-                        vim.cmd("TSInstall " .. lang)
-                    end
-                end
-            end)
-        end,
-    },
+			local ok, treesitter = pcall(require, "nvim-treesitter")
+			if not ok then
+				vim.notify("nvim-treesitter not available", vim.log.levels.ERROR)
+				return
+			end
 
-    -- Treesitter context (shows function/class context at top)
-    {
-        "nvim-treesitter/nvim-treesitter-context",
-        event = "VeryLazy",
-        opts = {
-            max_lines = 3,
-            trim_scope = "outer",
-        },
-    },
+			treesitter.setup({})
+			treesitter.install(ensure_installed)
+		end,
+	},
+
+	-- Treesitter context (shows function/class context at top)
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		event = "VeryLazy",
+		opts = {
+			max_lines = 3,
+			trim_scope = "outer",
+		},
+	},
 }
