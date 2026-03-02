@@ -67,5 +67,6 @@ set.title = true
 set.titlestring = "../%{fnamemodify(getcwd(), ':t')} nv"
 
 -- Project-local config
-set.exrc = true
+-- Opt-in for project-local config in untrusted repos.
+set.exrc = vim.env.NVIM_ENABLE_EXRC == "1"
 set.secure = true

@@ -1,24 +1,4 @@
 -- LSP, completion, and related tooling
-local function add_mason_to_path()
-	local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-	if not string.find(vim.env.PATH or "", mason_bin, 1, true) then
-		vim.env.PATH = mason_bin .. ":" .. (vim.env.PATH or "")
-	end
-	return mason_bin
-end
-
-local function resolve_cmd(mason_bin, binary)
-	local exepath = vim.fn.exepath(binary)
-	if exepath ~= "" then
-		return exepath
-	end
-	local mason_path = mason_bin .. "/" .. binary
-	if vim.fn.executable(mason_path) == 1 then
-		return mason_path
-	end
-	return nil
-end
-
 local function root_dir_with(markers)
 	return function(bufnr)
 		local root = vim.fs.root(bufnr, markers)
@@ -55,186 +35,186 @@ local function root_dir_with_patterns(patterns, markers)
 	end
 end
 
-local function setup_mason()
-	local mason = require("mason")
-	mason.setup()
-	add_mason_to_path()
+local function lsp_capabilities()
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	local ok_blink, blink = pcall(require, "blink.cmp")
+	if ok_blink then
+		return blink.get_lsp_capabilities(capabilities)
+	end
+	return capabilities
 end
 
-local function setup_lsp()
-	local ok_blink, blink = pcall(require, "blink.cmp")
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	if ok_blink then
-		capabilities = blink.get_lsp_capabilities(capabilities)
-	end
-
-	local mason_bin = add_mason_to_path()
-
-	local servers = {
-		lua_ls = {
-			bin = "lua-language-server",
-			filetypes = { "lua" },
-			root_markers = {
-				".luarc.json",
-				".luarc.jsonc",
-				".luacheckrc",
-				".stylua.toml",
-				"stylua.toml",
-				"selene.toml",
-				"selene.yml",
-				".git",
-			},
-			settings = {
-				Lua = {
-					completion = { callSnippet = "Replace" },
-					diagnostics = { globals = { "vim" } },
-					workspace = {
-						checkThirdParty = false,
-						library = vim.api.nvim_get_runtime_file("", true),
-					},
+local servers = {
+	lua_ls = {
+		bin = "lua-language-server",
+		filetypes = { "lua" },
+		root_markers = {
+			".luarc.json",
+			".luarc.jsonc",
+			".luacheckrc",
+			".stylua.toml",
+			"stylua.toml",
+			"selene.toml",
+			"selene.yml",
+			".git",
+		},
+		settings = {
+			Lua = {
+				completion = { callSnippet = "Replace" },
+				diagnostics = { globals = { "vim" } },
+				workspace = {
+					checkThirdParty = false,
+					library = vim.api.nvim_get_runtime_file("", true),
 				},
 			},
 		},
-		eslint = {
-			bin = "vscode-eslint-language-server",
-			args = { "--stdio" },
-			filetypes = {
-				"javascript",
-				"javascriptreact",
-				"javascript.jsx",
-				"typescript",
-				"typescriptreact",
-				"typescript.tsx",
-				"vue",
-				"svelte",
-				"astro",
-			},
-			root_markers = {
-				".eslintrc",
-				".eslintrc.js",
-				".eslintrc.cjs",
-				".eslintrc.yaml",
-				".eslintrc.yml",
-				".eslintrc.json",
-				"eslint.config.js",
-				"eslint.config.mjs",
-				"eslint.config.cjs",
-			},
+	},
+	eslint = {
+		bin = "vscode-eslint-language-server",
+		args = { "--stdio" },
+		filetypes = {
+			"javascript",
+			"javascriptreact",
+			"javascript.jsx",
+			"typescript",
+			"typescriptreact",
+			"typescript.tsx",
+			"vue",
+			"svelte",
+			"astro",
 		},
-		tailwindcss = {
-			bin = "tailwindcss-language-server",
-			args = { "--stdio" },
-			filetypes = {
-				"html",
-				"css",
-				"scss",
-				"javascript",
-				"javascriptreact",
-				"typescript",
-				"typescriptreact",
-				"vue",
-				"svelte",
-			},
-			root_markers = {
-				"tailwind.config.js",
-				"tailwind.config.cjs",
-				"tailwind.config.mjs",
-				"tailwind.config.ts",
-			},
+		root_markers = {
+			".eslintrc",
+			".eslintrc.js",
+			".eslintrc.cjs",
+			".eslintrc.yaml",
+			".eslintrc.yml",
+			".eslintrc.json",
+			"eslint.config.js",
+			"eslint.config.mjs",
+			"eslint.config.cjs",
 		},
-		dockerls = {
-			bin = "docker-langserver",
-			args = { "--stdio" },
-			filetypes = { "dockerfile" },
-			root_markers = { "Dockerfile", ".git" },
+	},
+	tailwindcss = {
+		bin = "tailwindcss-language-server",
+		args = { "--stdio" },
+		filetypes = {
+			"html",
+			"css",
+			"scss",
+			"javascript",
+			"javascriptreact",
+			"typescript",
+			"typescriptreact",
+			"vue",
+			"svelte",
 		},
-		bashls = {
-			bin = "bash-language-server",
-			args = { "start" },
-			filetypes = { "sh", "bash", "zsh" },
-			root_markers = { ".git" },
+		root_markers = {
+			"tailwind.config.js",
+			"tailwind.config.cjs",
+			"tailwind.config.mjs",
+			"tailwind.config.ts",
 		},
-		tsserver = {
-			bin = "typescript-language-server",
-			args = { "--stdio" },
-			filetypes = {
-				"javascript",
-				"javascriptreact",
-				"javascript.jsx",
-				"typescript",
-				"typescriptreact",
-				"typescript.tsx",
-			},
-			root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+	},
+	dockerls = {
+		bin = "docker-langserver",
+		args = { "--stdio" },
+		filetypes = { "dockerfile" },
+		root_markers = { "Dockerfile", ".git" },
+	},
+	bashls = {
+		bin = "bash-language-server",
+		args = { "start" },
+		filetypes = { "sh", "bash", "zsh" },
+		root_markers = { ".git" },
+	},
+	tsserver = {
+		bin = "typescript-language-server",
+		args = { "--stdio" },
+		filetypes = {
+			"javascript",
+			"javascriptreact",
+			"javascript.jsx",
+			"typescript",
+			"typescriptreact",
+			"typescript.tsx",
 		},
-		pyright = {
-			bin = "pyright-langserver",
-			args = { "--stdio" },
-			filetypes = { "python" },
-			root_markers = {
-				"pyproject.toml",
-				"setup.py",
-				"setup.cfg",
-				"requirements.txt",
-				"Pipfile",
-				"pyrightconfig.json",
-				".git",
-			},
+		root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+	},
+	pyright = {
+		bin = "pyright-langserver",
+		args = { "--stdio" },
+		filetypes = { "python" },
+		root_markers = {
+			"pyproject.toml",
+			"setup.py",
+			"setup.cfg",
+			"requirements.txt",
+			"Pipfile",
+			"pyrightconfig.json",
+			".git",
 		},
-		jsonls = {
-			bin = "vscode-json-language-server",
-			args = { "--stdio" },
-			filetypes = { "json", "jsonc" },
-			root_markers = { ".git" },
-		},
-		bicep = {
-			bin = "bicep-lsp",
-			filetypes = { "bicep" },
-			root_markers = { ".git" },
-		},
-		gopls = {
-			bin = "gopls",
-			filetypes = { "go", "gomod", "gowork", "gotmpl" },
-			root_markers = { "go.work", "go.mod", ".git" },
-			optional = true,
-		},
-		rust_analyzer = {
-			bin = "rust-analyzer",
-			filetypes = { "rust" },
-			root_markers = { "Cargo.toml", "rust-project.json", ".git" },
-			optional = true,
-		},
-		csharp_ls = {
-			bin = "csharp-ls",
-			filetypes = { "cs" },
-			root_dir = root_dir_with_patterns({ "%.sln$", "%.csproj$" }, { "global.json", ".git" }),
-			optional = true,
-		},
-	}
+	},
+	jsonls = {
+		bin = "vscode-json-language-server",
+		args = { "--stdio" },
+		filetypes = { "json", "jsonc" },
+		root_markers = { ".git" },
+	},
+	bicep = {
+		bin = "bicep-lsp",
+		filetypes = { "bicep" },
+		root_markers = { ".git" },
+	},
+	gopls = {
+		bin = "gopls",
+		filetypes = { "go", "gomod", "gowork", "gotmpl" },
+		root_markers = { "go.work", "go.mod", ".git" },
+		optional = true,
+	},
+	rust_analyzer = {
+		bin = "rust-analyzer",
+		filetypes = { "rust" },
+		root_markers = { "Cargo.toml", "rust-project.json", ".git" },
+		optional = true,
+	},
+	csharp_ls = {
+		bin = "csharp-ls",
+		filetypes = { "cs" },
+		root_dir = root_dir_with_patterns({ "%.sln$", "%.csproj$" }, { "global.json", ".git" }),
+		optional = true,
+	},
+}
+
+local function setup_lsp()
+	local capabilities = lsp_capabilities()
 
 	for name, server in pairs(servers) do
-		local cmd = resolve_cmd(mason_bin, server.bin)
-		if not cmd then
+		if vim.fn.executable(server.bin) ~= 1 then
 			if not server.optional then
 				vim.notify(("LSP server '%s' missing binary '%s'"):format(name, server.bin), vim.log.levels.WARN)
 			end
 			goto continue
 		end
 
-		local cmd_args = server.args or {}
 		local opts = {
-			cmd = vim.list_extend({ cmd }, cmd_args),
+			cmd = vim.list_extend({ server.bin }, server.args or {}),
 			filetypes = server.filetypes,
 			root_dir = server.root_dir or root_dir_with(server.root_markers),
 			settings = server.settings,
+			capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {}),
 		}
-		opts.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 
 		vim.lsp.config(name, opts)
 		vim.lsp.enable(name)
 
 		::continue::
 	end
+end
+
+local function setup_mason()
+	local mason = require("mason")
+	mason.setup()
 end
 
 local function setup_mason_and_lsp()
