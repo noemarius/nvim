@@ -20,35 +20,6 @@ local ensure_installed = {
 	"yaml",
 }
 
-local function install_missing_parsers(treesitter)
-	local installed = treesitter.get_installed("parsers")
-	local missing = {}
-
-	for _, parser in ipairs(ensure_installed) do
-		if not vim.list_contains(installed, parser) then
-			table.insert(missing, parser)
-		end
-	end
-
-	if #missing == 0 then
-		return
-	end
-
-	local ok_install, install_err = pcall(treesitter.install, missing)
-	if not ok_install then
-		vim.notify("Treesitter install failed: " .. tostring(install_err), vim.log.levels.WARN)
-	end
-end
-
-local function ensure_default_parsers()
-	local ok, treesitter = pcall(require, "nvim-treesitter")
-	if not ok then
-		return
-	end
-
-	install_missing_parsers(treesitter)
-end
-
 local function setup_treesitter()
 	local ok, treesitter = pcall(require, "nvim-treesitter")
 	if not ok then
@@ -66,14 +37,25 @@ local function setup_treesitter()
 			pcall(vim.treesitter.start, args.buf)
 		end,
 	})
+
+	vim.api.nvim_create_user_command("TSInstallDefaults", function()
+		local ok_install, install_err = pcall(treesitter.install, ensure_installed)
+		if not ok_install then
+			vim.notify("TSInstallDefaults failed: " .. tostring(install_err), vim.log.levels.WARN)
+		end
+	end, {
+		desc = "Install configured default Tree-sitter parsers",
+	})
 end
 
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = function()
+			-- Keep parser updates and default installs in the plugin lifecycle,
+			-- not on every editor startup.
 			vim.cmd("TSUpdate")
-			ensure_default_parsers()
+			vim.cmd("TSInstall " .. table.concat(ensure_installed, " "))
 		end,
 		lazy = false,
 		config = setup_treesitter,

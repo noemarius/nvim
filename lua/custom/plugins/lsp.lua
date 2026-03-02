@@ -44,6 +44,22 @@ local function lsp_capabilities()
 	return capabilities
 end
 
+local mason_ensure_installed = {
+	"lua-language-server",
+	"eslint-lsp",
+	"tailwindcss-language-server",
+	"dockerfile-language-server",
+	"bash-language-server",
+	"typescript-language-server",
+	"pyright",
+	"json-lsp",
+	"bicep-lsp",
+	"prettier",
+	"black",
+	"ruff",
+	"stylua",
+}
+
 local servers = {
 	lua_ls = {
 		bin = "lua-language-server",
@@ -128,7 +144,7 @@ local servers = {
 		filetypes = { "sh", "bash", "zsh" },
 		root_markers = { ".git" },
 	},
-	tsserver = {
+	ts_ls = {
 		bin = "typescript-language-server",
 		args = { "--stdio" },
 		filetypes = {
@@ -170,19 +186,16 @@ local servers = {
 		bin = "gopls",
 		filetypes = { "go", "gomod", "gowork", "gotmpl" },
 		root_markers = { "go.work", "go.mod", ".git" },
-		optional = true,
 	},
 	rust_analyzer = {
 		bin = "rust-analyzer",
 		filetypes = { "rust" },
 		root_markers = { "Cargo.toml", "rust-project.json", ".git" },
-		optional = true,
 	},
 	csharp_ls = {
 		bin = "csharp-ls",
 		filetypes = { "cs" },
 		root_dir = root_dir_with_patterns({ "%.sln$", "%.csproj$" }, { "global.json", ".git" }),
-		optional = true,
 	},
 }
 
@@ -190,13 +203,6 @@ local function setup_lsp()
 	local capabilities = lsp_capabilities()
 
 	for name, server in pairs(servers) do
-		if vim.fn.executable(server.bin) ~= 1 then
-			if not server.optional then
-				vim.notify(("LSP server '%s' missing binary '%s'"):format(name, server.bin), vim.log.levels.WARN)
-			end
-			goto continue
-		end
-
 		local opts = {
 			cmd = vim.list_extend({ server.bin }, server.args or {}),
 			filetypes = server.filetypes,
@@ -207,8 +213,6 @@ local function setup_lsp()
 
 		vim.lsp.config(name, opts)
 		vim.lsp.enable(name)
-
-		::continue::
 	end
 end
 
@@ -237,20 +241,7 @@ return {
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		dependencies = { "williamboman/mason.nvim" },
 		opts = {
-			ensure_installed = {
-				"lua-language-server",
-				"eslint-lsp",
-				"tailwindcss-language-server",
-				"dockerfile-language-server",
-				"bash-language-server",
-				"typescript-language-server",
-				"pyright",
-				"json-lsp",
-				"bicep-lsp",
-				"prettier",
-				"black",
-				"ruff",
-			},
+			ensure_installed = mason_ensure_installed,
 			auto_update = false,
 			run_on_start = true,
 		},
