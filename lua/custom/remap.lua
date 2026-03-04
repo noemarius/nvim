@@ -28,7 +28,7 @@ vim.keymap.set("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "[Session] Force quit 
 vim.keymap.set("n", "<leader>q", "<cmd>qa<CR>", { desc = "[Session] Quit all" })
 
 vim.keymap.set("n", "Q", "<nop>", { desc = "[Edit] Disable Ex mode" })
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "[LSP] Format buffer" })
+vim.keymap.set("n", "<leader>f", "<cmd>Format<CR>", { desc = "[Format] Format buffer" })
 
 vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "[Quickfix] Go to next" })
 vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "[Quickfix] Go to previous" })
