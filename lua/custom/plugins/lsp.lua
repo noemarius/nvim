@@ -47,7 +47,7 @@ end
 local mason_ensure_installed = {
 	"gopls",
 	"rust-analyzer",
-	"csharp-ls",
+	"csharp-language-server",
 	"lua-language-server",
 	"eslint-lsp",
 	"tailwindcss-language-server",
