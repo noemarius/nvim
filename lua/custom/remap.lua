@@ -1,5 +1,84 @@
 local M = {}
 
+local diagnostic_severity_names = {
+	[vim.diagnostic.severity.ERROR] = "ERROR",
+	[vim.diagnostic.severity.WARN] = "WARN",
+	[vim.diagnostic.severity.INFO] = "INFO",
+	[vim.diagnostic.severity.HINT] = "HINT",
+}
+
+local function get_buffer_diagnostic_lines(bufnr)
+	local diagnostics = vim.diagnostic.get(bufnr)
+	if vim.tbl_isempty(diagnostics) then
+		return {}
+	end
+
+	table.sort(diagnostics, function(left, right)
+		if left.lnum ~= right.lnum then
+			return left.lnum < right.lnum
+		end
+
+		if left.col ~= right.col then
+			return left.col < right.col
+		end
+
+		return (left.severity or vim.diagnostic.severity.ERROR) < (right.severity or vim.diagnostic.severity.ERROR)
+	end)
+
+	local filename = vim.api.nvim_buf_get_name(bufnr)
+	local display_name = filename ~= "" and vim.fn.fnamemodify(filename, ":.") or "[No Name]"
+	local lines = {}
+
+	for _, diagnostic in ipairs(diagnostics) do
+		local message = diagnostic.message:gsub("\r\n", "\n"):gsub("\n", "\\n")
+		local severity = diagnostic_severity_names[diagnostic.severity] or "UNKNOWN"
+		table.insert(
+			lines,
+			string.format("%s:%d:%d [%s] %s", display_name, diagnostic.lnum + 1, diagnostic.col + 1, severity, message)
+		)
+	end
+
+	return lines
+end
+
+local function copy_buffer_diagnostics()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local lines = get_buffer_diagnostic_lines(bufnr)
+	if vim.tbl_isempty(lines) then
+		vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
+		return
+	end
+
+	local text = table.concat(lines, "\n")
+	vim.fn.setreg("+", text)
+	vim.notify(string.format("Copied %d diagnostic(s) to clipboard", #lines), vim.log.levels.INFO)
+end
+
+local function make_current_file_executable()
+	local filepath = vim.api.nvim_buf_get_name(0)
+	if filepath == "" then
+		vim.notify("Save the file before changing permissions", vim.log.levels.WARN)
+		return
+	end
+
+	local result = vim.system({ "chmod", "+x", filepath }, { text = true }):wait(5000)
+	if not result then
+		vim.notify("chmod timed out", vim.log.levels.WARN)
+		return
+	end
+
+	if result.code ~= 0 then
+		local error_output = vim.trim(result.stderr ~= "" and result.stderr or result.stdout or "")
+		if error_output == "" then
+			error_output = string.format("exit code %d", result.code)
+		end
+		vim.notify("chmod failed: " .. error_output, vim.log.levels.ERROR)
+		return
+	end
+
+	vim.notify("Made file executable: " .. vim.fn.fnamemodify(filepath, ":."), vim.log.levels.INFO)
+end
+
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "[Netrw] Open file explorer" })
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "[Edit] Move selection down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "[Edit] Move selection up" })
@@ -8,12 +87,7 @@ vim.keymap.set("n", "J", "mzJ`z", { desc = "[Edit] Join lines (cursor stays)" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "[Navigation] Scroll down (centered)" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "[Navigation] Scroll up (centered)" })
 
-vim.keymap.set(
-	"n",
-	"<leader>cd",
-	'<cmd>lua vim.diagnostic.open_float()<CR><cmd>lua vim.diagnostic.open_float()<CR>ggVG"+Y<CR>',
-	{ desc = "[Diagnostic] Copy to clipboard" }
-)
+vim.keymap.set("n", "<leader>cd", copy_buffer_diagnostics, { desc = "[Diagnostic] Copy buffer diagnostics" })
 
 vim.keymap.set("n", "<leader>/", ":nohl<CR>", { desc = "[Search] Clear highlight" })
 vim.keymap.set("x", "<leader>p", [['_dP]], { desc = "[Edit] Paste without overwriting register" })
@@ -22,7 +96,6 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[Clipboard] Yank se
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "[Clipboard] Yank line" })
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "[Edit] Delete to black hole register" })
-
 
 vim.keymap.set("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "[Session] Force quit all" })
 vim.keymap.set("n", "<leader>q", "<cmd>qa<CR>", { desc = "[Session] Quit all" })
@@ -50,7 +123,7 @@ vim.keymap.set(
 	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
 	{ desc = "[Search] Replace word under cursor" }
 )
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "[File] Make executable" })
+vim.keymap.set("n", "<leader>x", make_current_file_executable, { desc = "[File] Make executable" })
 
 vim.keymap.set(
 	"n",
@@ -59,7 +132,12 @@ vim.keymap.set(
 	{ desc = "[Snippet] Go error handling" }
 )
 
-vim.keymap.set("n", "<leader>vm", "<cmd>e ~/.config/nvim/lua/custom/remap.lua<CR>", { desc = "[Config] Edit remap.lua" })
+vim.keymap.set(
+	"n",
+	"<leader>vm",
+	"<cmd>e ~/.config/nvim/lua/custom/remap.lua<CR>",
+	{ desc = "[Config] Edit remap.lua" }
+)
 vim.keymap.set("n", "<leader>vp", "<cmd>e ~/.config/nvim/lua/custom/plugins/<CR>", { desc = "[Config] Edit plugins" })
 
 vim.keymap.set("n", "<leader><leader>", function()

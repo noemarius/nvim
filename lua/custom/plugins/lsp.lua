@@ -45,6 +45,9 @@ local function lsp_capabilities()
 end
 
 local mason_ensure_installed = {
+	"gopls",
+	"rust-analyzer",
+	"csharp-ls",
 	"lua-language-server",
 	"eslint-lsp",
 	"tailwindcss-language-server",

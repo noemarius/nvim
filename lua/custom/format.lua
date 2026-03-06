@@ -5,6 +5,7 @@ local format_group = vim.api.nvim_create_augroup("CustomFormat", { clear = true 
 
 -- Track warnings to avoid spamming
 local warned = {}
+local formatter_timeout_ms = 5000
 
 -- Global toggle for autoformat
 vim.g.autoformat_enabled = true
@@ -84,15 +85,31 @@ end
 
 -- Run a CLI formatter and return formatted content or nil on error
 local function run_formatter(cmd, args, source, filepath)
-	local full_args = vim.list_extend({ cmd }, args)
-	local output = vim.fn.system(full_args, source)
-
-	if vim.v.shell_error ~= 0 then
-		vim.notify(cmd .. " failed: " .. output, vim.log.levels.ERROR)
+	local full_args = vim.list_extend({ cmd }, vim.deepcopy(args))
+	local job = vim.system(full_args, {
+		stdin = source,
+		text = true,
+	})
+	local result = job:wait(formatter_timeout_ms)
+	if not result then
+		job:kill(15)
+		warn_once(
+			cmd .. "_timeout",
+			string.format("%s timed out after %dms; skipped formatting for %s", cmd, formatter_timeout_ms, filepath)
+		)
 		return nil
 	end
 
-	return output
+	if result.code ~= 0 then
+		local error_output = vim.trim(result.stderr ~= "" and result.stderr or result.stdout or "")
+		if error_output == "" then
+			error_output = string.format("exit code %d", result.code)
+		end
+		vim.notify(cmd .. " failed: " .. error_output, vim.log.levels.ERROR)
+		return nil
+	end
+
+	return result.stdout
 end
 
 -- Apply formatted content to buffer if different

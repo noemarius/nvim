@@ -1,5 +1,6 @@
 local vim = vim
 local api = vim.api
+local uv = vim.uv or vim.loop
 
 local function set_indent(bufnr, width)
 	local buffer = vim.bo[bufnr]
@@ -61,6 +62,8 @@ api.nvim_create_autocmd("FileType", {
 
 -- Open opencode panel on startup if .opencode config exists in cwd
 local opencode_group = api.nvim_create_augroup("custom_opencode", { clear = true })
+local opencode_focus_delay_ms = 750
+local opencode_focus_timer = uv and uv.new_timer and uv.new_timer() or nil
 
 local function opencode_tmux_port()
 	if not vim.env.TMUX then
@@ -145,6 +148,17 @@ local function opencode_attach_tmux()
 		end)
 end
 
+local function schedule_opencode_attach_tmux()
+	if not opencode_focus_timer then
+		opencode_attach_tmux()
+		return
+	end
+
+	-- Debounce focus-triggered attaches to avoid repeated tmux queries while switching panes.
+	opencode_focus_timer:stop()
+	opencode_focus_timer:start(opencode_focus_delay_ms, 0, vim.schedule_wrap(opencode_attach_tmux))
+end
+
 local function opencode_cleanup_cwd()
 	local cwd = vim.fn.getcwd()
 	local pgrep = vim.system({ "pgrep", "-f", "opencode.*--port" }, { text = true }):wait()
@@ -201,8 +215,28 @@ api.nvim_create_user_command("OpencodeAttachTmux", opencode_attach_tmux, {
 	desc = "Attach opencode using tmux session port",
 })
 
-api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
+api.nvim_create_autocmd("VimEnter", {
 	group = opencode_group,
 	desc = "Attach opencode using tmux session port",
 	callback = opencode_attach_tmux,
+})
+
+api.nvim_create_autocmd("FocusGained", {
+	group = opencode_group,
+	desc = "Debounced opencode tmux attach on focus",
+	callback = schedule_opencode_attach_tmux,
+})
+
+api.nvim_create_autocmd("VimLeavePre", {
+	group = opencode_group,
+	desc = "Clean up debounced opencode focus timer",
+	callback = function()
+		if not opencode_focus_timer then
+			return
+		end
+
+		opencode_focus_timer:stop()
+		opencode_focus_timer:close()
+		opencode_focus_timer = nil
+	end,
 })

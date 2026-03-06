@@ -163,7 +163,6 @@ return {
 			excluded_buftypes = {},
 			bookmark_0 = {
 				sign = "⚑",
-				virt_text = "hello world",
 				annotate = false,
 			},
 			mappings = {},
