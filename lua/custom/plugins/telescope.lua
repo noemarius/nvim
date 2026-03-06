@@ -93,12 +93,26 @@ return {
 			pickers = {
 				find_files = {
 					hidden = true,
+					-- Include files ignored by .gitignore so hidden dotfiles are searchable.
+					no_ignore = true,
+				},
+				live_grep = {
+					additional_args = function()
+						-- Search hidden/gitignored dotfiles, but skip repository internals.
+						return { "--hidden", "--no-ignore", "--glob", "!.git/*" }
+					end,
+				},
+				grep_string = {
+					additional_args = function()
+						-- Match live_grep behavior for one-off input searches.
+						return { "--hidden", "--no-ignore", "--glob", "!.git/*" }
+					end,
 				},
 			},
 			defaults = {
 				file_ignore_patterns = {
 					"node_modules",
-					".git",
+					"%.git/",
 					".keep",
 				},
 			},
