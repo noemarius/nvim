@@ -52,7 +52,6 @@ set.timeoutlen = 300
 
 -- UX
 set.mouse = "a"
-set.clipboard = "unnamedplus"
 set.isfname:append("@-@")
 set.shortmess:append("sI")
 

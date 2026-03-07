@@ -62,8 +62,21 @@ api.nvim_create_autocmd("FileType", {
 
 -- Open opencode panel on startup if .opencode config exists in cwd
 local opencode_group = api.nvim_create_augroup("custom_opencode", { clear = true })
-local opencode_focus_delay_ms = 750
+local opencode_focus_delay_ms = 350
+local opencode_focus_check_interval_ms = 3000
 local opencode_focus_timer = uv and uv.new_timer and uv.new_timer() or nil
+local opencode_focus_last_check_ms = 0
+local opencode_focus_last_session = nil
+local opencode_focus_last_port = nil
+local opencode_focus_attach_in_progress = false
+
+local function monotonic_time_ms()
+	if not uv or not uv.hrtime then
+		return 0
+	end
+
+	return math.floor(uv.hrtime() / 1000000)
+end
 
 local function opencode_tmux_port()
 	if not vim.env.TMUX then
@@ -94,8 +107,48 @@ local function opencode_tmux_port()
 	return port
 end
 
-local function opencode_attach_tmux()
-	local port = opencode_tmux_port()
+local function opencode_tmux_session_port(callback)
+	if not vim.env.TMUX then
+		callback(nil, nil)
+		return
+	end
+
+	if vim.fn.executable("tmux") ~= 1 then
+		callback(nil, nil)
+		return
+	end
+
+	vim.system({ "tmux", "display-message", "-p", "#{session_name}" }, { text = true }, function(session)
+		if session.code ~= 0 then
+			vim.schedule(function()
+				callback(nil, nil)
+			end)
+			return
+		end
+
+		local session_name = vim.trim(session.stdout or "")
+		if session_name == "" then
+			vim.schedule(function()
+				callback(nil, nil)
+			end)
+			return
+		end
+
+		vim.system({ "tmux", "show-environment", "-t", session_name, "OPENCODE_PORT" }, { text = true }, function(env)
+			local port = nil
+			if env.code == 0 then
+				local line = vim.trim(env.stdout or "")
+				port = tonumber(line:match("^OPENCODE_PORT=(%d+)$"))
+			end
+
+			vim.schedule(function()
+				callback(port, session_name)
+			end)
+		end)
+	end)
+end
+
+local function opencode_connect(port)
 	if not port then
 		return
 	end
@@ -148,15 +201,96 @@ local function opencode_attach_tmux()
 		end)
 end
 
+local function opencode_attach_tmux()
+	local port = opencode_tmux_port()
+	if not port then
+		return
+	end
+
+	opencode_connect(port)
+end
+
+local function should_skip_focus_attach()
+	if not vim.env.TMUX then
+		return true
+	end
+
+	if vim.fn.executable("tmux") ~= 1 then
+		return true
+	end
+
+	if not package.loaded["opencode"] and not package.loaded["opencode.config"] then
+		return true
+	end
+
+	return false
+end
+
+local function maybe_attach_opencode_on_focus()
+	if should_skip_focus_attach() then
+		return
+	end
+
+	local now = monotonic_time_ms()
+	if
+		opencode_focus_last_check_ms > 0
+		and now > 0
+		and (now - opencode_focus_last_check_ms) < opencode_focus_check_interval_ms
+	then
+		return
+	end
+
+	if opencode_focus_attach_in_progress then
+		return
+	end
+
+	opencode_focus_attach_in_progress = true
+	opencode_tmux_session_port(function(port, session_name)
+		opencode_focus_attach_in_progress = false
+		opencode_focus_last_check_ms = monotonic_time_ms()
+
+		if not port or not session_name then
+			return
+		end
+
+		local current_port = nil
+		local ok_config, config = pcall(require, "opencode.config")
+		if ok_config and config and config.opts then
+			current_port = tonumber(config.opts.port)
+		end
+
+		if current_port == nil and vim.g.opencode_opts then
+			current_port = tonumber(vim.g.opencode_opts.port)
+		end
+
+		if
+			session_name == opencode_focus_last_session
+			and port == opencode_focus_last_port
+			and current_port == port
+		then
+			return
+		end
+
+		opencode_focus_last_session = session_name
+		opencode_focus_last_port = port
+
+		if current_port == port then
+			return
+		end
+
+		opencode_connect(port)
+	end)
+end
+
 local function schedule_opencode_attach_tmux()
 	if not opencode_focus_timer then
-		opencode_attach_tmux()
+		maybe_attach_opencode_on_focus()
 		return
 	end
 
 	-- Debounce focus-triggered attaches to avoid repeated tmux queries while switching panes.
 	opencode_focus_timer:stop()
-	opencode_focus_timer:start(opencode_focus_delay_ms, 0, vim.schedule_wrap(opencode_attach_tmux))
+	opencode_focus_timer:start(opencode_focus_delay_ms, 0, vim.schedule_wrap(maybe_attach_opencode_on_focus))
 end
 
 local function opencode_cleanup_cwd()

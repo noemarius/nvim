@@ -79,6 +79,44 @@ local function make_current_file_executable()
 	vim.notify("Made file executable: " .. vim.fn.fnamemodify(filepath, ":."), vim.log.levels.INFO)
 end
 
+local function get_visual_selection_text()
+	local start_pos = vim.fn.getpos("v")
+	local end_pos = vim.fn.getpos(".")
+	local start_row = start_pos[2] - 1
+	local start_col = start_pos[3] - 1
+	local end_row = end_pos[2] - 1
+	local end_col = end_pos[3] - 1
+
+	if start_row > end_row or (start_row == end_row and start_col > end_col) then
+		start_row, end_row = end_row, start_row
+		start_col, end_col = end_col, start_col
+	end
+
+	local mode = vim.fn.visualmode()
+	if mode == "V" then
+		start_col = 0
+		local end_line = vim.api.nvim_buf_get_lines(0, end_row, end_row + 1, false)[1] or ""
+		end_col = #end_line
+	else
+		end_col = end_col + 1
+	end
+
+	local lines = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})
+	return table.concat(lines, "\n")
+end
+
+local function open_substitute_prompt(text)
+	if text == "" then
+		return
+	end
+
+	local escaped = text:gsub("\n", [[\n]])
+	local pattern = "\\V" .. vim.fn.escape(escaped, [[\/]])
+	local replacement = vim.fn.escape(escaped, [[\/&]])
+	local keys = string.format(":%%s/%s/%s/gI<Left><Left><Left>", pattern, replacement)
+	vim.api.nvim_feedkeys(vim.keycode(keys), "n", false)
+end
+
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "[Netrw] Open file explorer" })
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "[Edit] Move selection down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "[Edit] Move selection up" })
@@ -91,6 +129,7 @@ vim.keymap.set("n", "<leader>cd", copy_buffer_diagnostics, { desc = "[Diagnostic
 
 vim.keymap.set("n", "<leader>/", ":nohl<CR>", { desc = "[Search] Clear highlight" })
 vim.keymap.set("x", "<leader>p", [['_dP]], { desc = "[Edit] Paste without overwriting register" })
+vim.keymap.set("x", "p", [['_dP]], { desc = "[Edit] Paste without overwriting register" })
 
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[Clipboard] Yank selection" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "[Clipboard] Yank line" })
@@ -123,6 +162,16 @@ vim.keymap.set(
 	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
 	{ desc = "[Search] Replace word under cursor" }
 )
+
+vim.keymap.set("x", "<leader>s", function()
+	local selection = get_visual_selection_text()
+	if selection == "" then
+		return
+	end
+
+	vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
+	open_substitute_prompt(selection)
+end, { desc = "[Search] Replace selected text" })
 vim.keymap.set("n", "<leader>x", make_current_file_executable, { desc = "[File] Make executable" })
 
 vim.keymap.set(
