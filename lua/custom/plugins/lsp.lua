@@ -1,21 +1,25 @@
 -- LSP, completion, and related tooling
+-- Native vim.lsp.config requires the function form of root_dir to call the
+-- on_dir callback (returning a value is ignored, and the server never starts).
 local function root_dir_with(markers)
-    return function(bufnr)
+    return function(bufnr, on_dir)
         local root = vim.fs.root(bufnr, markers)
         if root then
-            return root
+            on_dir(root)
+            return
         end
         local name = vim.api.nvim_buf_get_name(bufnr)
         if name == "" then
-            return nil
+            return
         end
-        return vim.fs.dirname(name)
+        -- Fall back to the file's directory so standalone files still get LSP.
+        on_dir(vim.fs.dirname(name))
     end
 end
 
 local function root_dir_with_patterns(patterns, markers)
     local marker_root = root_dir_with(markers)
-    return function(bufnr)
+    return function(bufnr, on_dir)
         local name = vim.api.nvim_buf_get_name(bufnr)
         if name ~= "" then
             local start_dir = vim.fs.dirname(name)
@@ -28,10 +32,11 @@ local function root_dir_with_patterns(patterns, markers)
                 return false
             end, { path = start_dir, upward = true, type = "file" })[1]
             if match then
-                return vim.fs.dirname(match)
+                on_dir(vim.fs.dirname(match))
+                return
             end
         end
-        return marker_root(bufnr)
+        marker_root(bufnr, on_dir)
     end
 end
 
