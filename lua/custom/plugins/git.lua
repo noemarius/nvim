@@ -33,14 +33,20 @@ return {
                 end
 
                 -- Navigation
-                map("n", "<leader>hn", function() gs.nav_hunk("next") end, { desc = "[Gitsigns] Next hunk" })
-                map("n", "<leader>hp", function() gs.nav_hunk("prev") end, { desc = "[Gitsigns] Previous hunk" })
+                map("n", "<leader>hn", function()
+                    gs.nav_hunk("next")
+                end, { desc = "[Gitsigns] Next hunk" })
+                map("n", "<leader>hp", function()
+                    gs.nav_hunk("prev")
+                end, { desc = "[Gitsigns] Previous hunk" })
 
                 -- Actions
                 map("n", "<leader>hs", gs.stage_hunk, { desc = "[Gitsigns] Stage hunk" })
                 map("n", "<leader>hr", gs.reset_hunk, { desc = "[Gitsigns] Reset hunk" })
                 map("n", "<leader>hv", gs.preview_hunk, { desc = "[Gitsigns] Preview hunk" })
-                map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, { desc = "[Gitsigns] Blame line (full)" })
+                map("n", "<leader>hb", function()
+                    gs.blame_line({ full = true })
+                end, { desc = "[Gitsigns] Blame line (full)" })
             end,
         },
         config = function(_, opts)

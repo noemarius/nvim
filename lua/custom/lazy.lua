@@ -1,58 +1,58 @@
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
-	local out = vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable",
-		lazypath,
-	})
-	if vim.v.shell_error ~= 0 then
-		vim.api.nvim_echo({
-			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
-		}, true, {})
-		return
-	end
+    local out = vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable",
+        lazypath,
+    })
+    if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+            { out, "WarningMsg" },
+        }, true, {})
+        return
+    end
 end
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
 local ok_lazy, lazy = pcall(require, "lazy")
 if not ok_lazy then
-	vim.notify("lazy.nvim is unavailable; skipping plugin setup", vim.log.levels.ERROR)
-	return
+    vim.notify("lazy.nvim is unavailable; skipping plugin setup", vim.log.levels.ERROR)
+    return
 end
 
 lazy.setup({
-	spec = {
-		{ import = "custom.plugins" },
-	},
-	defaults = {
-		lazy = false,
-	},
-	install = {
-		colorscheme = { "tokyonight" },
-	},
-	checker = {
-		enabled = false,
-	},
-	change_detection = {
-		notify = false,
-	},
-	performance = {
-		rtp = {
-			disabled_plugins = {
-				"gzip",
-				"matchit",
-				"matchparen",
-				"tarPlugin",
-				"tohtml",
-				"tutor",
-				"zipPlugin",
-			},
-		},
-	},
+    spec = {
+        { import = "custom.plugins" },
+    },
+    defaults = {
+        lazy = false,
+    },
+    install = {
+        colorscheme = { "tokyonight" },
+    },
+    checker = {
+        enabled = false,
+    },
+    change_detection = {
+        notify = false,
+    },
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "gzip",
+                "matchit",
+                "matchparen",
+                "tarPlugin",
+                "tohtml",
+                "tutor",
+                "zipPlugin",
+            },
+        },
+    },
 })

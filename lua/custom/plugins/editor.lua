@@ -67,10 +67,38 @@ return {
             "nvim-treesitter/nvim-treesitter",
         },
         keys = {
-            { "<leader>re", mode = "x", function() require("refactoring").refactor("Extract Function") end, desc = "[Refactor] Extract function" },
-            { "<leader>rf", mode = "x", function() require("refactoring").refactor("Extract Function To File") end, desc = "[Refactor] Extract to file" },
-            { "<leader>rv", mode = "x", function() require("refactoring").refactor("Extract Variable") end, desc = "[Refactor] Extract variable" },
-            { "<leader>ri", mode = { "n", "x" }, function() require("refactoring").refactor("Inline Variable") end, desc = "[Refactor] Inline variable" },
+            {
+                "<leader>re",
+                mode = "x",
+                function()
+                    require("refactoring").refactor("Extract Function")
+                end,
+                desc = "[Refactor] Extract function",
+            },
+            {
+                "<leader>rf",
+                mode = "x",
+                function()
+                    require("refactoring").refactor("Extract Function To File")
+                end,
+                desc = "[Refactor] Extract to file",
+            },
+            {
+                "<leader>rv",
+                mode = "x",
+                function()
+                    require("refactoring").refactor("Extract Variable")
+                end,
+                desc = "[Refactor] Extract variable",
+            },
+            {
+                "<leader>ri",
+                mode = { "n", "x" },
+                function()
+                    require("refactoring").refactor("Inline Variable")
+                end,
+                desc = "[Refactor] Inline variable",
+            },
         },
         config = function()
             require("refactoring").setup({})
