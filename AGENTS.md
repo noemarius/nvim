@@ -15,10 +15,10 @@ Use td usage -q after first read.
 3. Build step is just launching Neovim; no compilation artifacts should be generated.
 4. Run full validation with `nvim --headless "+Lazy sync" "+qa"` after touching plugins.
 5. Smoke-test a single module via `nvim --headless "+luafile lua/custom/<file>.lua" "+qa"`.
-6. Use `stylua lua/**/*.lua` for formatting; default config (indent=4 spaces) matches existing style.
+6. Use `stylua lua/**/*.lua` for formatting; style is enforced by `.stylua.toml` (4-space indent, double quotes).
 7. Run `luacheck` if available for linting; target files you changed to keep feedback focused.
 8. Prefer double-quoted strings and table constructors with trailing commas for multi-line blocks.
-9. Use 4 spaces, never tabs; align chained tables and callbacks vertically.
+9. Use 4 spaces, never tabs (enforced by `.stylua.toml`); align chained tables and callbacks vertically.
 10. Declare locals for module-level references (e.g., `local blink = require("blink.cmp")`).
 11. Keep all require statements grouped at the top of each file before side effects.
 12. Module naming: snake_case files inside lua/custom, PascalCase only for exported tables when needed.

@@ -224,6 +224,21 @@ nvim --headless -c "lua require('custom')" -c "qa"
 
 ---
 
+## Phase 10: Config Review Fixes ✅
+
+| Task                              | Status  | Details                                                                                            |
+| --------------------------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| Enforce format style             | ✅ Done | Added `.stylua.toml` (4-space, spaces); normalized all Lua files (previously mixed tabs/spaces)    |
+| Fix format.lua LSP API           | ✅ Done | `client.supports_method` → `client:supports_method` (dot form deprecated, removed in Nvim 0.13)   |
+| Fix format.lua timeout branch    | ✅ Done | Detect timeout via `result.code == 124`; removed dead `if not result` block                        |
+| Migrate opencode provider→server | ✅ Done | `autocmds.lua` now uses `opencode.server` + nested `server.port` (plugin removed `provider`)       |
+| Reduce keymap friction           | ✅ Done | Harpoon prev/next → `[a`/`]a`; splits → `<leader>wv`/`<leader>ws` (removes `<leader>s` timeout)    |
+| Sync documentation               | ✅ Done | README keymaps/exrc/version, AGENTS.md style contradiction, CLAUDE.md version, health.lua 0.12 gate |
+
+> Note: exrc is **opt-in** via `NVIM_ENABLE_EXRC=1` (supersedes the Phase 7 "enabled" note).
+
+---
+
 ## Summary
 
 | Phase | Focus                                                    | Status      |
@@ -232,3 +247,4 @@ nvim --headless -c "lua require('custom')" -c "qa"
 | 7     | Quick wins (exrc, cleanup)                               | ✅ Complete |
 | 8     | Harpoon 2 migration                                      | ✅ Complete |
 | 9     | blink.cmp migration                                      | ✅ Complete |
+| 10    | Config review fixes (style, format, opencode, docs)      | ✅ Complete |

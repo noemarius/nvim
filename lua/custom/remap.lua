@@ -1,120 +1,120 @@
 local M = {}
 
 local diagnostic_severity_names = {
-	[vim.diagnostic.severity.ERROR] = "ERROR",
-	[vim.diagnostic.severity.WARN] = "WARN",
-	[vim.diagnostic.severity.INFO] = "INFO",
-	[vim.diagnostic.severity.HINT] = "HINT",
+    [vim.diagnostic.severity.ERROR] = "ERROR",
+    [vim.diagnostic.severity.WARN] = "WARN",
+    [vim.diagnostic.severity.INFO] = "INFO",
+    [vim.diagnostic.severity.HINT] = "HINT",
 }
 
 local function get_buffer_diagnostic_lines(bufnr)
-	local diagnostics = vim.diagnostic.get(bufnr)
-	if vim.tbl_isempty(diagnostics) then
-		return {}
-	end
+    local diagnostics = vim.diagnostic.get(bufnr)
+    if vim.tbl_isempty(diagnostics) then
+        return {}
+    end
 
-	table.sort(diagnostics, function(left, right)
-		if left.lnum ~= right.lnum then
-			return left.lnum < right.lnum
-		end
+    table.sort(diagnostics, function(left, right)
+        if left.lnum ~= right.lnum then
+            return left.lnum < right.lnum
+        end
 
-		if left.col ~= right.col then
-			return left.col < right.col
-		end
+        if left.col ~= right.col then
+            return left.col < right.col
+        end
 
-		return (left.severity or vim.diagnostic.severity.ERROR) < (right.severity or vim.diagnostic.severity.ERROR)
-	end)
+        return (left.severity or vim.diagnostic.severity.ERROR) < (right.severity or vim.diagnostic.severity.ERROR)
+    end)
 
-	local filename = vim.api.nvim_buf_get_name(bufnr)
-	local display_name = filename ~= "" and vim.fn.fnamemodify(filename, ":.") or "[No Name]"
-	local lines = {}
+    local filename = vim.api.nvim_buf_get_name(bufnr)
+    local display_name = filename ~= "" and vim.fn.fnamemodify(filename, ":.") or "[No Name]"
+    local lines = {}
 
-	for _, diagnostic in ipairs(diagnostics) do
-		local message = diagnostic.message:gsub("\r\n", "\n"):gsub("\n", "\\n")
-		local severity = diagnostic_severity_names[diagnostic.severity] or "UNKNOWN"
-		table.insert(
-			lines,
-			string.format("%s:%d:%d [%s] %s", display_name, diagnostic.lnum + 1, diagnostic.col + 1, severity, message)
-		)
-	end
+    for _, diagnostic in ipairs(diagnostics) do
+        local message = diagnostic.message:gsub("\r\n", "\n"):gsub("\n", "\\n")
+        local severity = diagnostic_severity_names[diagnostic.severity] or "UNKNOWN"
+        table.insert(
+            lines,
+            string.format("%s:%d:%d [%s] %s", display_name, diagnostic.lnum + 1, diagnostic.col + 1, severity, message)
+        )
+    end
 
-	return lines
+    return lines
 end
 
 local function copy_buffer_diagnostics()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local lines = get_buffer_diagnostic_lines(bufnr)
-	if vim.tbl_isempty(lines) then
-		vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
-		return
-	end
+    local bufnr = vim.api.nvim_get_current_buf()
+    local lines = get_buffer_diagnostic_lines(bufnr)
+    if vim.tbl_isempty(lines) then
+        vim.notify("No diagnostics in current buffer", vim.log.levels.INFO)
+        return
+    end
 
-	local text = table.concat(lines, "\n")
-	vim.fn.setreg("+", text)
-	vim.notify(string.format("Copied %d diagnostic(s) to clipboard", #lines), vim.log.levels.INFO)
+    local text = table.concat(lines, "\n")
+    vim.fn.setreg("+", text)
+    vim.notify(string.format("Copied %d diagnostic(s) to clipboard", #lines), vim.log.levels.INFO)
 end
 
 local function make_current_file_executable()
-	local filepath = vim.api.nvim_buf_get_name(0)
-	if filepath == "" then
-		vim.notify("Save the file before changing permissions", vim.log.levels.WARN)
-		return
-	end
+    local filepath = vim.api.nvim_buf_get_name(0)
+    if filepath == "" then
+        vim.notify("Save the file before changing permissions", vim.log.levels.WARN)
+        return
+    end
 
-	local result = vim.system({ "chmod", "+x", filepath }, { text = true }):wait(5000)
-	if not result then
-		vim.notify("chmod timed out", vim.log.levels.WARN)
-		return
-	end
+    local result = vim.system({ "chmod", "+x", filepath }, { text = true }):wait(5000)
+    if not result then
+        vim.notify("chmod timed out", vim.log.levels.WARN)
+        return
+    end
 
-	if result.code ~= 0 then
-		local error_output = vim.trim(result.stderr ~= "" and result.stderr or result.stdout or "")
-		if error_output == "" then
-			error_output = string.format("exit code %d", result.code)
-		end
-		vim.notify("chmod failed: " .. error_output, vim.log.levels.ERROR)
-		return
-	end
+    if result.code ~= 0 then
+        local error_output = vim.trim(result.stderr ~= "" and result.stderr or result.stdout or "")
+        if error_output == "" then
+            error_output = string.format("exit code %d", result.code)
+        end
+        vim.notify("chmod failed: " .. error_output, vim.log.levels.ERROR)
+        return
+    end
 
-	vim.notify("Made file executable: " .. vim.fn.fnamemodify(filepath, ":."), vim.log.levels.INFO)
+    vim.notify("Made file executable: " .. vim.fn.fnamemodify(filepath, ":."), vim.log.levels.INFO)
 end
 
 local function get_visual_selection_text()
-	local start_pos = vim.fn.getpos("v")
-	local end_pos = vim.fn.getpos(".")
-	local start_row = start_pos[2] - 1
-	local start_col = start_pos[3] - 1
-	local end_row = end_pos[2] - 1
-	local end_col = end_pos[3] - 1
+    local start_pos = vim.fn.getpos("v")
+    local end_pos = vim.fn.getpos(".")
+    local start_row = start_pos[2] - 1
+    local start_col = start_pos[3] - 1
+    local end_row = end_pos[2] - 1
+    local end_col = end_pos[3] - 1
 
-	if start_row > end_row or (start_row == end_row and start_col > end_col) then
-		start_row, end_row = end_row, start_row
-		start_col, end_col = end_col, start_col
-	end
+    if start_row > end_row or (start_row == end_row and start_col > end_col) then
+        start_row, end_row = end_row, start_row
+        start_col, end_col = end_col, start_col
+    end
 
-	local mode = vim.fn.visualmode()
-	if mode == "V" then
-		start_col = 0
-		local end_line = vim.api.nvim_buf_get_lines(0, end_row, end_row + 1, false)[1] or ""
-		end_col = #end_line
-	else
-		end_col = end_col + 1
-	end
+    local mode = vim.fn.visualmode()
+    if mode == "V" then
+        start_col = 0
+        local end_line = vim.api.nvim_buf_get_lines(0, end_row, end_row + 1, false)[1] or ""
+        end_col = #end_line
+    else
+        end_col = end_col + 1
+    end
 
-	local lines = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})
-	return table.concat(lines, "\n")
+    local lines = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})
+    return table.concat(lines, "\n")
 end
 
 local function open_substitute_prompt(text)
-	if text == "" then
-		return
-	end
+    if text == "" then
+        return
+    end
 
-	local escaped = text:gsub("\n", [[\n]])
-	local pattern = "\\V" .. vim.fn.escape(escaped, [[\/]])
-	local replacement = vim.fn.escape(escaped, [[\/&]])
-	local keys = string.format(":%%s/%s/%s/gI<Left><Left><Left>", pattern, replacement)
-	vim.api.nvim_feedkeys(vim.keycode(keys), "n", false)
+    local escaped = text:gsub("\n", [[\n]])
+    local pattern = "\\V" .. vim.fn.escape(escaped, [[\/]])
+    local replacement = vim.fn.escape(escaped, [[\/&]])
+    local keys = string.format(":%%s/%s/%s/gI<Left><Left><Left>", pattern, replacement)
+    vim.api.nvim_feedkeys(vim.keycode(keys), "n", false)
 end
 
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "[Netrw] Open file explorer" })
@@ -148,8 +148,8 @@ vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "[Loclist] Go to next" })
 vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "[Loclist] Go to previous" })
 
 -- Optional window management helpers
-vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", { desc = "[Window] Vertical split" })
-vim.keymap.set("n", "<leader>sh", ":split<CR>", { desc = "[Window] Horizontal split" })
+vim.keymap.set("n", "<leader>wv", ":vsplit<CR>", { desc = "[Window] Vertical split" })
+vim.keymap.set("n", "<leader>ws", ":split<CR>", { desc = "[Window] Horizontal split" })
 vim.keymap.set("n", "<leader>w=", "<C-w>=", { desc = "[Window] Balance all" })
 vim.keymap.set("n", "<leader>wh", "<C-w>h", { desc = "[Window] Go left" })
 vim.keymap.set("n", "<leader>wj", "<C-w>j", { desc = "[Window] Go down" })
@@ -157,98 +157,98 @@ vim.keymap.set("n", "<leader>wk", "<C-w>k", { desc = "[Window] Go up" })
 vim.keymap.set("n", "<leader>wl", "<C-w>l", { desc = "[Window] Go right" })
 
 vim.keymap.set(
-	"n",
-	"<leader>s",
-	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-	{ desc = "[Search] Replace word under cursor" }
+    "n",
+    "<leader>s",
+    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+    { desc = "[Search] Replace word under cursor" }
 )
 
 vim.keymap.set("x", "<leader>s", function()
-	local selection = get_visual_selection_text()
-	if selection == "" then
-		return
-	end
+    local selection = get_visual_selection_text()
+    if selection == "" then
+        return
+    end
 
-	vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
-	open_substitute_prompt(selection)
+    vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
+    open_substitute_prompt(selection)
 end, { desc = "[Search] Replace selected text" })
 vim.keymap.set("n", "<leader>x", make_current_file_executable, { desc = "[File] Make executable" })
 
 vim.keymap.set(
-	"n",
-	"<leader>ge",
-	"oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>",
-	{ desc = "[Snippet] Go error handling" }
+    "n",
+    "<leader>ge",
+    "oif err != nil {<CR>}<Esc>Oreturn nil, err<Esc>",
+    { desc = "[Snippet] Go error handling" }
 )
 
 vim.keymap.set(
-	"n",
-	"<leader>vm",
-	"<cmd>e ~/.config/nvim/lua/custom/remap.lua<CR>",
-	{ desc = "[Config] Edit remap.lua" }
+    "n",
+    "<leader>vm",
+    "<cmd>e ~/.config/nvim/lua/custom/remap.lua<CR>",
+    { desc = "[Config] Edit remap.lua" }
 )
 vim.keymap.set("n", "<leader>vp", "<cmd>e ~/.config/nvim/lua/custom/plugins/<CR>", { desc = "[Config] Edit plugins" })
 
 vim.keymap.set("n", "<leader><leader>", function()
-	vim.cmd("so")
-	vim.notify("Sourced current file")
+    vim.cmd("so")
+    vim.notify("Sourced current file")
 end, { desc = "[Config] Source current file" })
 
 -- Wraps opencode-specific mappings so they only run when the plugin is available.
 local function map_opencode(modes, lhs, handler, desc)
-	vim.keymap.set(modes, lhs, function()
-		local ok, opencode = pcall(require, "opencode")
-		if not ok then
-			-- Surface a gentle warning instead of throwing when the plugin is missing.
-			vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
-			return
-		end
+    vim.keymap.set(modes, lhs, function()
+        local ok, opencode = pcall(require, "opencode")
+        if not ok then
+            -- Surface a gentle warning instead of throwing when the plugin is missing.
+            vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
+            return
+        end
 
-		handler(opencode)
-	end, { desc = desc, silent = true })
+        handler(opencode)
+    end, { desc = desc, silent = true })
 end
 
 map_opencode({ "n", "x" }, "<leader>oa", function(opencode)
-	opencode.ask("@this: ", { submit = true })
+    opencode.ask("@this: ", { submit = true })
 end, "[Opencode] Ask about context")
 
 map_opencode({ "n", "x" }, "<leader>oo", function(opencode)
-	opencode.select()
+    opencode.select()
 end, "[Opencode] Select action")
 
 -- Toggle opencode panel (works in both normal and terminal mode)
 vim.keymap.set({ "n", "t" }, "<C-.>", function()
-	local ok, opencode = pcall(require, "opencode")
-	if not ok then
-		vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
-		return
-	end
-	opencode.toggle()
+    local ok, opencode = pcall(require, "opencode")
+    if not ok then
+        vim.notify("opencode.nvim is unavailable", vim.log.levels.WARN)
+        return
+    end
+    opencode.toggle()
 end, { desc = "[Opencode] Toggle panel", silent = true })
 
 -- Exit terminal-mode without sending Escape to the TUI (won't interrupt agent flows)
 vim.keymap.set("t", [[<C-\><C-\>]], [[<C-\><C-n><C-w>p]], { desc = "[Terminal] Exit to normal mode" })
 
 function M.apply_lsp_keymaps(opts)
-	opts = opts or {}
+    opts = opts or {}
 
-	local function map(mode, lhs, rhs, desc)
-		local map_opts = vim.tbl_extend("force", opts, { desc = desc })
-		vim.keymap.set(mode, lhs, rhs, map_opts)
-	end
+    local function map(mode, lhs, rhs, desc)
+        local map_opts = vim.tbl_extend("force", opts, { desc = desc })
+        vim.keymap.set(mode, lhs, rhs, map_opts)
+    end
 
-	map("n", "K", vim.lsp.buf.hover, "[LSP] Hover documentation")
-	map("n", "gd", vim.lsp.buf.definition, "[LSP] Go to definition")
-	map("n", "gD", vim.lsp.buf.declaration, "[LSP] Go to declaration")
-	map("n", "gi", vim.lsp.buf.implementation, "[LSP] Go to implementation")
-	map("n", "go", vim.lsp.buf.type_definition, "[LSP] Go to type definition")
-	map("n", "gr", vim.lsp.buf.references, "[LSP] Find references")
-	map("n", "gs", vim.lsp.buf.signature_help, "[LSP] Signature help")
-	map("n", "<F2>", vim.lsp.buf.rename, "[LSP] Rename symbol")
-	vim.keymap.set({ "n", "x" }, "<F3>", function()
-		vim.lsp.buf.format({ async = true })
-	end, vim.tbl_extend("force", opts, { desc = "[LSP] Format buffer" }))
-	map("n", "<F4>", vim.lsp.buf.code_action, "[LSP] Code action")
+    map("n", "K", vim.lsp.buf.hover, "[LSP] Hover documentation")
+    map("n", "gd", vim.lsp.buf.definition, "[LSP] Go to definition")
+    map("n", "gD", vim.lsp.buf.declaration, "[LSP] Go to declaration")
+    map("n", "gi", vim.lsp.buf.implementation, "[LSP] Go to implementation")
+    map("n", "go", vim.lsp.buf.type_definition, "[LSP] Go to type definition")
+    map("n", "gr", vim.lsp.buf.references, "[LSP] Find references")
+    map("n", "gs", vim.lsp.buf.signature_help, "[LSP] Signature help")
+    map("n", "<F2>", vim.lsp.buf.rename, "[LSP] Rename symbol")
+    vim.keymap.set({ "n", "x" }, "<F3>", function()
+        vim.lsp.buf.format({ async = true })
+    end, vim.tbl_extend("force", opts, { desc = "[LSP] Format buffer" }))
+    map("n", "<F4>", vim.lsp.buf.code_action, "[LSP] Code action")
 end
 
 return M

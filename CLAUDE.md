@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Personal Neovim configuration (Lua). Requires Neovim 0.11+ for the built-in LSP workflow.
+Personal Neovim configuration (Lua). Requires Neovim 0.12+ (built-in LSP workflow and the pinned nvim-treesitter).
 
 ## Validation Commands
 
@@ -26,11 +26,11 @@ luacheck lua/custom/<file>.lua
 
 Entry point is `init.lua` → `require("custom")` → `lua/custom/init.lua`, which loads modules in order:
 
-1. **options** — editor settings (indentation, search, display, exrc enabled)
+1. **options** — editor settings (indentation, search, display, exrc opt-in via `NVIM_ENABLE_EXRC=1`)
 2. **lazy** — lazy.nvim bootstrap and plugin specs from `lua/custom/plugins/`
 3. **autocmds** — filetype-based indent rules, opencode lifecycle
 4. **remap** — all keymaps (leader is Space); exports `apply_lsp_keymaps()` used by lsp.lua on `LspAttach`
-5. **format** — format-on-save: dispatches to CLI formatters (stylua, prettier, ruff, csharpier) per filetype with LSP fallback
+5. **format** — format-on-save: dispatches to CLI formatters (stylua, prettier, ruff, csharpier, rustfmt) per filetype with LSP fallback
 6. **lsp** — diagnostics config and LspAttach keymaps
 
 Plugin specs live in `lua/custom/plugins/`:
@@ -45,7 +45,7 @@ Plugin specs live in `lua/custom/plugins/`:
 
 ## Code Style
 
-- 4-space indentation
+- 4-space indentation (enforced by `.stylua.toml`)
 - Double-quoted strings, trailing commas in multi-line tables
 - `local` declarations for module-level requires, grouped at top of file
 - Guard optional plugins with `pcall(require, "...")` before use
