@@ -210,7 +210,7 @@ end
 
 map_opencode({ "n", "x" }, "<leader>oa", function(opencode)
     opencode.ask("@this: ", { submit = true })
-end, "[Opencode] Ask about context")
+end, "[Opencode] Ask about selection or cursor")
 
 map_opencode({ "n", "x" }, "<leader>oo", function(opencode)
     opencode.select()

@@ -24,7 +24,26 @@ return {
         "numToStr/Comment.nvim",
         event = "VeryLazy",
         config = function()
-            require("Comment").setup()
+            local comment = require("Comment")
+            local comment_ft = require("Comment.ft")
+            local calculate = comment_ft.calculate
+
+            -- Comment.nvim assumes get_parser() throws when unavailable; Neovim 0.12 can return nil.
+            comment_ft.calculate = function(ctx)
+                local ok_parser, parser = pcall(vim.treesitter.get_parser, vim.api.nvim_get_current_buf())
+                if not ok_parser or not parser then
+                    return comment_ft.get(vim.bo.filetype, ctx.ctype)
+                end
+
+                local ok_cstr, cstr = pcall(calculate, ctx)
+                if ok_cstr then
+                    return cstr
+                end
+
+                return comment_ft.get(vim.bo.filetype, ctx.ctype)
+            end
+
+            comment.setup()
         end,
     },
 
