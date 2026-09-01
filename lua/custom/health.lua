@@ -21,6 +21,9 @@ function M.check()
     local required_tools = {
         { "git", "Version control" },
         { "rg", "Ripgrep for fast searching" },
+        -- nvim-treesitter's main branch shells out to `tree-sitter build`;
+        -- without it every parser install fails silently.
+        { "tree-sitter", "Tree-sitter CLI, required to build parsers" },
     }
 
     for _, tool in ipairs(required_tools) do
@@ -100,6 +103,25 @@ function M.check()
     else
         vim.health.warn("Undo directory does not exist: " .. undodir)
         vim.health.info("Create with: mkdir -p " .. undodir)
+    end
+
+    -- Check that parsers were actually installed. An empty parser dir means
+    -- treesitter highlighting silently falls back to Neovim's 7 bundled
+    -- parsers, which is easy to miss because the FileType hook pcalls start().
+    vim.health.start("Tree-sitter parsers")
+
+    local ok_ts, treesitter = pcall(require, "nvim-treesitter")
+    if not ok_ts then
+        vim.health.warn("nvim-treesitter is not loaded")
+    else
+        local installed = treesitter.get_installed("parsers")
+        if #installed == 0 then
+            vim.health.error("No Tree-sitter parsers installed; highlighting is limited to bundled languages")
+            vim.health.info("Install the CLI (brew install tree-sitter), then run :TSInstallDefaults")
+        else
+            vim.health.ok(string.format("%d Tree-sitter parser(s) installed", #installed))
+            vim.health.info("Run :TSMissing to list configured parsers that are absent")
+        end
     end
 
     -- Check tree-sitter cache ownership to prevent EACCES during parser updates
