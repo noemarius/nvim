@@ -13,8 +13,8 @@ local ensure_installed = {
     "gomod",
     "html",
     "javascript",
+    -- jsonc is not a separate parser on this branch; json covers it.
     "json",
-    "jsonc",
     "lua",
     "luadoc",
     "markdown",
