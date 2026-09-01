@@ -1,95 +1,184 @@
+-- Debugging: nvim-dap plus its UI.
+-- Both live in one spec so there is a single lazy trigger point; dap-ui's
+-- listeners must be registered in the same pass that loads dap, otherwise
+-- starting a session would not open the UI.
+local function setup_dap()
+    local dap = require("dap")
+    local dapui = require("dapui")
+    local debugger = require("custom.debugger")
+
+    -- Function form: nvim-dap evaluates this when a session starts, so the
+    -- xcrun lookup never runs at startup.
+    dap.adapters.lldb = function(callback)
+        local adapter = debugger.lldb_adapter()
+        if adapter then
+            callback(adapter)
+        end
+    end
+
+    local signs = {
+        DapBreakpoint = {
+            text = "●",
+            texthl = "DapBreakpointSign",
+            numhl = "DapBreakpointSign",
+        },
+        DapBreakpointCondition = {
+            text = "⊜",
+            texthl = "DapBreakpointConditionSign",
+            numhl = "DapBreakpointConditionSign",
+        },
+        DapBreakpointRejected = {
+            text = "⊘",
+            texthl = "DapBreakpointRejectedSign",
+            numhl = "DapBreakpointRejectedSign",
+        },
+        DapLogPoint = {
+            text = "◆",
+            texthl = "DapLogPointSign",
+            numhl = "DapLogPointSign",
+        },
+        DapStopped = {
+            text = "▶",
+            texthl = "DapStoppedSign",
+            numhl = "DapStoppedSign",
+            linehl = "DapStoppedLine",
+        },
+    }
+
+    for name, sign in pairs(signs) do
+        vim.fn.sign_define(name, sign)
+    end
+
+    dapui.setup()
+
+    dap.listeners.before.attach.dapui_config = function()
+        dapui.open()
+    end
+    dap.listeners.before.launch.dapui_config = function()
+        dapui.open()
+    end
+    dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+    end
+    dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
+    end
+end
+
 return {
     {
         "mfussenegger/nvim-dap",
-        config = function()
-            local dap = require("dap")
-
-            dap.adapters.lldb = {
-                type = "executable",
-                command = "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-dap",
-                name = "lldb",
-                options = {
-                    initialize_timeout_sec = 20,
-                },
-            }
-
-            local signs = {
-                DapBreakpoint = {
-                    text = "●",
-                    texthl = "DapBreakpointSign",
-                    numhl = "DapBreakpointSign",
-                },
-                DapBreakpointCondition = {
-                    text = "⊜",
-                    texthl = "DapBreakpointConditionSign",
-                    numhl = "DapBreakpointConditionSign",
-                },
-                DapBreakpointRejected = {
-                    text = "⊘",
-                    texthl = "DapBreakpointRejectedSign",
-                    numhl = "DapBreakpointRejectedSign",
-                },
-                DapLogPoint = {
-                    text = "◆",
-                    texthl = "DapLogPointSign",
-                    numhl = "DapLogPointSign",
-                },
-                DapStopped = {
-                    text = "▶",
-                    texthl = "DapStoppedSign",
-                    numhl = "DapStoppedSign",
-                    linehl = "DapStoppedLine",
-                },
-            }
-
-            for name, sign in pairs(signs) do
-                vim.fn.sign_define(name, sign)
-            end
-
-            vim.keymap.set("n", "<F5>", dap.continue, { desc = "[DAP] Continue" })
-            vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "[DAP] Toggle breakpoint" })
-            vim.keymap.set("n", "<F10>", dap.step_over, { desc = "[DAP] Step over" })
-            vim.keymap.set("n", "<F11>", dap.step_into, { desc = "[DAP] Step into" })
-            vim.keymap.set("n", "<F12>", dap.step_out, { desc = "[DAP] Step out" })
-            vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "[DAP] Open REPL" })
-            vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "[DAP] Run last" })
-            vim.keymap.set("n", "<leader>dt", dap.terminate, { desc = "[DAP] Terminate" })
-            vim.keymap.set("n", "<leader>db", dap.clear_breakpoints, { desc = "[DAP] Clear all breakpoints" })
-            vim.keymap.set({ "n", "v" }, "<leader>dh", function()
-                require("dap.ui.widgets").hover()
-            end, { desc = "[DAP] Hover value" })
-        end,
-    },
-    {
-        "rcarriga/nvim-dap-ui",
         dependencies = {
-            "mfussenegger/nvim-dap",
+            "rcarriga/nvim-dap-ui",
             "nvim-neotest/nvim-nio",
         },
-        config = function()
-            local dap = require("dap")
-            local dapui = require("dapui")
+        cmd = { "DapContinue", "DapToggleBreakpoint", "DapTerminate" },
+        keys = {
+            {
+                "<F5>",
+                function()
+                    require("dap").continue()
+                end,
+                desc = "[DAP] Continue",
+            },
+            {
+                "<F9>",
+                function()
+                    require("dap").toggle_breakpoint()
+                end,
+                desc = "[DAP] Toggle breakpoint",
+            },
+            {
+                "<F10>",
+                function()
+                    require("dap").step_over()
+                end,
+                desc = "[DAP] Step over",
+            },
+            {
+                "<F11>",
+                function()
+                    require("dap").step_into()
+                end,
+                desc = "[DAP] Step into",
+            },
+            {
+                "<F12>",
+                function()
+                    require("dap").step_out()
+                end,
+                desc = "[DAP] Step out",
+            },
+            {
+                "<leader>dr",
+                function()
+                    require("dap").repl.open()
+                end,
+                desc = "[DAP] Open REPL",
+            },
+            {
+                "<leader>dl",
+                function()
+                    require("dap").run_last()
+                end,
+                desc = "[DAP] Run last",
+            },
+            {
+                "<leader>dt",
+                function()
+                    require("dap").terminate()
+                end,
+                desc = "[DAP] Terminate",
+            },
+            {
+                "<leader>db",
+                function()
+                    require("dap").clear_breakpoints()
+                end,
+                desc = "[DAP] Clear all breakpoints",
+            },
+            {
+                "<leader>dh",
+                function()
+                    require("dap.ui.widgets").hover()
+                end,
+                mode = { "n", "v" },
+                desc = "[DAP] Hover value",
+            },
+            {
+                "<leader>du",
+                function()
+                    require("dapui").toggle()
+                end,
+                desc = "[DAP] Toggle UI",
+            },
+            {
+                "<leader>de",
+                function()
+                    require("dapui").eval()
+                end,
+                mode = { "n", "v" },
+                desc = "[DAP] Evaluate expression",
+            },
+            {
+                "<leader>ds",
+                function()
+                    require("dapui").float_element("scopes", { enter = true })
+                end,
+                desc = "[DAP] Show scopes",
+            },
+        },
+        config = setup_dap,
+    },
 
-            dapui.setup()
+    {
+        "rcarriga/nvim-dap-ui",
+        dependencies = { "nvim-neotest/nvim-nio" },
+        lazy = true,
+    },
 
-            dap.listeners.before.attach.dapui_config = function()
-                dapui.open()
-            end
-            dap.listeners.before.launch.dapui_config = function()
-                dapui.open()
-            end
-            dap.listeners.before.event_terminated.dapui_config = function()
-                dapui.close()
-            end
-            dap.listeners.before.event_exited.dapui_config = function()
-                dapui.close()
-            end
-
-            vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "[DAP] Toggle UI" })
-            vim.keymap.set({ "n", "v" }, "<leader>de", dapui.eval, { desc = "[DAP] Evaluate expression" })
-            vim.keymap.set("n", "<leader>ds", function()
-                dapui.float_element("scopes", { enter = true })
-            end, { desc = "[DAP] Show scopes" })
-        end,
+    {
+        "nvim-neotest/nvim-nio",
+        lazy = true,
     },
 }
