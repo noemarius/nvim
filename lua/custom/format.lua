@@ -222,7 +222,7 @@ local formatters = {
             "--emit",
             "stdout",
             "--edition",
-            "2021",
+            "2024",
         }, source, filepath)
     end,
 }

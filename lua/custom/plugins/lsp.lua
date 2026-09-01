@@ -51,7 +51,6 @@ end
 
 local mason_ensure_installed = {
     "gopls",
-    "rust-analyzer",
     "csharp-language-server",
     "lua-language-server",
     "eslint-lsp",
@@ -194,11 +193,6 @@ local servers = {
         bin = "gopls",
         filetypes = { "go", "gomod", "gowork", "gotmpl" },
         root_markers = { "go.work", "go.mod", ".git" },
-    },
-    rust_analyzer = {
-        bin = "rust-analyzer",
-        filetypes = { "rust" },
-        root_markers = { "Cargo.toml", "rust-project.json", ".git" },
     },
     csharp_ls = {
         bin = "csharp-ls",

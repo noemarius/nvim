@@ -6,6 +6,15 @@ return {
         lazy = false,
         priority = 1000,
         config = function()
+            require("tokyonight").setup({
+                on_highlights = function(hl, colors)
+                    hl.DapBreakpointSign = { fg = colors.red, bold = true }
+                    hl.DapBreakpointConditionSign = { fg = colors.yellow, bold = true }
+                    hl.DapBreakpointRejectedSign = { fg = colors.purple, bold = true }
+                    hl.DapLogPointSign = { fg = colors.cyan, bold = true }
+                    hl.DapStoppedSign = { fg = colors.green, bold = true }
+                end,
+            })
             vim.cmd.colorscheme("tokyonight")
             vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
             vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
