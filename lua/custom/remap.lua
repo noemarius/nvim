@@ -128,8 +128,8 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "[Navigation] Scroll up (center
 vim.keymap.set("n", "<leader>cd", copy_buffer_diagnostics, { desc = "[Diagnostic] Copy buffer diagnostics" })
 
 vim.keymap.set("n", "<leader>/", ":nohl<CR>", { desc = "[Search] Clear highlight" })
-vim.keymap.set("x", "<leader>p", [['_dP]], { desc = "[Edit] Paste without overwriting register" })
-vim.keymap.set("x", "p", [['_dP]], { desc = "[Edit] Paste without overwriting register" })
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "[Edit] Paste without overwriting register" })
+vim.keymap.set("x", "p", [["_dP]], { desc = "[Edit] Paste without overwriting register" })
 
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[Clipboard] Yank selection" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "[Clipboard] Yank line" })

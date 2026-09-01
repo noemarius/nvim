@@ -7,7 +7,15 @@ return {
         dependencies = { "nvim-lua/plenary.nvim" },
         config = function()
             local harpoon = require("harpoon")
-            harpoon:setup({})
+            -- save_on_toggle is false by default, which silently discards menu
+            -- edits (dd to remove, line moves to reorder) when the quick menu
+            -- is closed with q/<Esc>/BufLeave. Enabling it resolves the buffer
+            -- contents back into the list, which emits LIST_CHANGE and persists.
+            harpoon:setup({
+                settings = {
+                    save_on_toggle = true,
+                },
+            })
 
             vim.keymap.set("n", "<leader>a", function()
                 harpoon:list():add()
