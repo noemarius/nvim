@@ -20,7 +20,9 @@ return {
             vim.keymap.set("n", "<leader>a", function()
                 harpoon:list():add()
             end, { desc = "[Harpoon] Add file" })
-            vim.keymap.set("n", "<leader>al", function()
+            -- <leader>A, not <leader>al: a two-key map sharing the <leader>a
+            -- prefix would stall the bare add mapping for `timeoutlen`.
+            vim.keymap.set("n", "<leader>A", function()
                 harpoon.ui:toggle_quick_menu(harpoon:list())
             end, { desc = "[Harpoon] Toggle menu" })
             vim.keymap.set("n", "<leader>1", function()

@@ -134,7 +134,8 @@ vim.keymap.set("x", "p", [["_dP]], { desc = "[Edit] Paste without overwriting re
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "[Clipboard] Yank selection" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "[Clipboard] Yank line" })
 
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "[Edit] Delete to black hole register" })
+-- Uppercase so the <leader>d* DAP group is not gated behind `timeoutlen`.
+vim.keymap.set({ "n", "v" }, "<leader>D", [["_d]], { desc = "[Edit] Delete to black hole register" })
 
 vim.keymap.set("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "[Session] Force quit all" })
 vim.keymap.set("n", "<leader>q", "<cmd>qa<CR>", { desc = "[Session] Quit all" })
@@ -172,7 +173,8 @@ vim.keymap.set("x", "<leader>s", function()
     vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)
     open_substitute_prompt(selection)
 end, { desc = "[Search] Replace selected text" })
-vim.keymap.set("n", "<leader>x", make_current_file_executable, { desc = "[File] Make executable" })
+-- Uppercase so the <leader>x* Trouble group is not gated behind `timeoutlen`.
+vim.keymap.set("n", "<leader>X", make_current_file_executable, { desc = "[File] Make executable" })
 
 vim.keymap.set(
     "n",
