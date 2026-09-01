@@ -15,7 +15,9 @@ set.smartindent = true
 set.wrap = true
 set.termguicolors = true
 set.scrolloff = 8
-set.signcolumn = "yes"
+-- Two columns: diagnostics, gitsigns, marks and DAP breakpoints all draw
+-- here, and a single column silently hides whichever loses the priority race.
+set.signcolumn = "yes:2"
 set.colorcolumn = "80"
 set.cursorline = true
 set.showmode = false

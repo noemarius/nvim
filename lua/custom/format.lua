@@ -125,22 +125,39 @@ local function apply_format(bufnr, formatted)
     end
 
     local current = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local current_text = table.concat(current, "\n") .. "\n"
+    local formatted_text = table.concat(lines, "\n") .. "\n"
 
-    -- Check if content changed
-    if #lines == #current then
-        local identical = true
-        for idx = 1, #lines do
-            if lines[idx] ~= current[idx] then
-                identical = false
-                break
-            end
-        end
-        if identical then
-            return false
-        end
+    if current_text == formatted_text then
+        return false
     end
 
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    -- Replace only the lines that actually changed. Rewriting the whole buffer
+    -- with a single nvim_buf_set_lines drops extmarks and folds and clamps the
+    -- cursor, which is very visible when this runs on every save.
+    local hunks = vim.diff(current_text, formatted_text, {
+        result_type = "indices",
+        algorithm = "histogram",
+    })
+
+    if not hunks or #hunks == 0 then
+        return false
+    end
+
+    -- Back-to-front so earlier hunk indices stay valid as we edit.
+    for idx = #hunks, 1, -1 do
+        local start_a, count_a, start_b, count_b = unpack(hunks[idx])
+        local replacement = {}
+        for offset = 0, count_b - 1 do
+            table.insert(replacement, lines[start_b + offset])
+        end
+
+        -- vim.diff reports count_a == 0 for a pure insertion, where start_a is
+        -- the line to insert *after* rather than the first line to replace.
+        local first = count_a == 0 and start_a or start_a - 1
+        vim.api.nvim_buf_set_lines(bufnr, first, first + count_a, false, replacement)
+    end
+
     return true
 end
 
