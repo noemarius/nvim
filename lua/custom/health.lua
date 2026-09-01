@@ -23,7 +23,7 @@ function M.check()
         { "rg", "Ripgrep for fast searching" },
         -- nvim-treesitter's main branch shells out to `tree-sitter build`;
         -- without it every parser install fails silently.
-        { "tree-sitter", "Tree-sitter CLI, required to build parsers" },
+        { "tree-sitter", "Tree-sitter CLI, required to build parsers (brew install tree-sitter-cli)" },
     }
 
     for _, tool in ipairs(required_tools) do
@@ -117,7 +117,7 @@ function M.check()
         local installed = treesitter.get_installed("parsers")
         if #installed == 0 then
             vim.health.error("No Tree-sitter parsers installed; highlighting is limited to bundled languages")
-            vim.health.info("Install the CLI (brew install tree-sitter), then run :TSInstallDefaults")
+            vim.health.info("Install the CLI (brew install tree-sitter-cli), then run :TSInstallDefaults")
         else
             vim.health.ok(string.format("%d Tree-sitter parser(s) installed", #installed))
             vim.health.info("Run :TSMissing to list configured parsers that are absent")

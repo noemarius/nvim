@@ -41,7 +41,9 @@ local function has_tree_sitter_cli()
     end
 
     vim.notify(
-        "tree-sitter CLI not found; parsers cannot be built.\nInstall it with: brew install tree-sitter",
+        "tree-sitter CLI not found; parsers cannot be built.\n"
+            .. "Install it with: brew install tree-sitter-cli\n"
+            .. "(the `tree-sitter` formula is the library only and ships no binary)",
         vim.log.levels.ERROR
     )
     return false

@@ -69,7 +69,7 @@ Plugin specs live in `lua/custom/plugins/`:
 - Plugin-specific keymaps defined in their lazy.nvim specs (keys table)
 - LSP servers configured with native `vim.lsp.config`/`vim.lsp.enable` API — **except Rust**, which rustaceanvim owns entirely; do not add a `rust_analyzer` entry to `plugins/lsp.lua`
 - rustaceanvim builds its own capabilities, so blink's are passed explicitly in `plugins/rust.lua`; every other server gets them from `lsp_capabilities()`
-- Tree-sitter parsers need the `tree-sitter` CLI (`brew install tree-sitter`); `install()`/`update()` are async and must be `:wait()`ed in script contexts, or they are silently abandoned
+- Tree-sitter parsers need the `tree-sitter` CLI (`brew install tree-sitter-cli` — the `tree-sitter` formula is the library only and ships no binary); `install()`/`update()` are async and must be `:wait()`ed in script contexts, or they are silently abandoned
 - Single-key `<leader>x` maps must not share a prefix with a keymap group, or the group is gated behind `timeoutlen` (hence `<leader>D`/`<leader>X`/`<leader>A`)
 - Completions via blink.cmp (Rust-based), Harpoon 2 for file navigation
 - Opencode integration: auto-opens when `.opencode` file/dir exists in project root; cleanup stale servers with `:OpencodeCleanupCwd`
