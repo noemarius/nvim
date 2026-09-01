@@ -211,14 +211,29 @@ local formatters = {
         end
     end,
 
-    -- C#: csharpier
+    -- C#: csharpier. Mason installs the binary as `csharpier`; the dotnet
+    -- global tool installs it as `dotnet-csharpier`. Accept either.
     cs = function(bufnr, filepath, source)
-        if vim.fn.executable("dotnet-csharpier") == 0 then
+        local bin = nil
+        for _, candidate in ipairs({ "csharpier", "dotnet-csharpier" }) do
+            if vim.fn.executable(candidate) == 1 then
+                bin = candidate
+                break
+            end
+        end
+
+        if not bin then
             warn_once("csharpier", "csharpier not found; install via Mason")
             return nil
         end
-        return run_formatter("dotnet-csharpier", {
+
+        -- CSharpier 1.x moved --write-stdout under the `format` subcommand and
+        -- takes the buffer on stdin with --stdin-path rather than a positional
+        -- path. The old `<bin> --write-stdout <file>` form errors out.
+        return run_formatter(bin, {
+            "format",
             "--write-stdout",
+            "--stdin-path",
             filepath,
         }, source, filepath)
     end,

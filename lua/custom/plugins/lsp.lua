@@ -65,6 +65,7 @@ local mason_ensure_installed = {
     "black",
     "ruff",
     "stylua",
+    "csharpier",
 }
 
 local servers = {

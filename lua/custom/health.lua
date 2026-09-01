@@ -37,6 +37,9 @@ function M.check()
     -- Check optional CLI tools
     vim.health.start("Optional CLI tools")
 
+    -- Third element lists alternate binary names; any one of them counts as
+    -- installed. csharpier ships as `csharpier` via Mason and
+    -- `dotnet-csharpier` via the dotnet global tool.
     local optional_tools = {
         { "fd", "Fast file finder for Telescope" },
         { "stylua", "Lua formatter" },
@@ -44,15 +47,26 @@ function M.check()
         { "ruff", "Fast Python formatter/linter" },
         { "black", "Python formatter (fallback)" },
         { "rustfmt", "Rust formatter" },
-        { "dotnet-csharpier", "C# formatter" },
+        { "csharpier", "C# formatter", { "dotnet-csharpier" } },
         { "tmux", "Terminal multiplexer integration" },
     }
 
     for _, tool in ipairs(optional_tools) do
-        if vim.fn.executable(tool[1]) == 1 then
-            vim.health.ok(tool[1] .. " installed (" .. tool[2] .. ")")
+        local names = { tool[1] }
+        vim.list_extend(names, tool[3] or {})
+
+        local found = nil
+        for _, name in ipairs(names) do
+            if vim.fn.executable(name) == 1 then
+                found = name
+                break
+            end
+        end
+
+        if found then
+            vim.health.ok(found .. " installed (" .. tool[2] .. ")")
         else
-            vim.health.warn(tool[1] .. " not found (" .. tool[2] .. ")")
+            vim.health.warn(table.concat(names, " / ") .. " not found (" .. tool[2] .. ")")
         end
     end
 
